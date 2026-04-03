@@ -1,0 +1,780 @@
+אנ<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>אדונית השוקולד — הפרלינים שלנו</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=Raleway:wght@100;200;300&display=swap" rel="stylesheet">
+
+<style>
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+:root {
+  --chocolate: #2A1A14;
+  --cream: #F5EDE0;
+  --ivory: #FAF6EE;
+  --gold: #B8945A;
+  --gold-light: #D4AF72;
+  --warm-gray: #C4B09A;
+}
+
+html, body {
+  width: 100%; height: 100%;
+  background: #0D0906;
+  overflow: hidden;
+  font-family: 'Raleway', sans-serif;
+}
+
+/* ══════════════════════════════════
+   STAGE — the film container
+══════════════════════════════════ */
+#stage {
+  position: relative;
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+  background: #E8DDD0; /* cream bg matching the pralines photo */
+}
+
+/* ══════════════════════════════════
+   THE IMAGE — full pralines photo
+══════════════════════════════════ */
+#pralines-img {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center center;
+  transform-origin: center center;
+  will-change: transform, object-position;
+  transition: none; /* controlled by JS */
+}
+
+/* ══════════════════════════════════
+   LETTERBOX BARS (cinematic)
+══════════════════════════════════ */
+.letterbox-top,
+.letterbox-bottom {
+  position: fixed;
+  left: 0; right: 0;
+  z-index: 50;
+  background: #0D0906;
+  pointer-events: none;
+}
+.letterbox-top    { top: 0;    height: 0; }
+.letterbox-bottom { bottom: 0; height: 0; }
+
+/* ══════════════════════════════════
+   FILM GRAIN OVERLAY
+══════════════════════════════════ */
+#grain {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  pointer-events: none;
+  opacity: 0.045;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='1'/%3E%3C/svg%3E");
+  background-size: 200px 200px;
+  animation: grainShift 0.08s steps(1) infinite;
+  mix-blend-mode: overlay;
+}
+@keyframes grainShift {
+  0%   { background-position: 0 0; }
+  25%  { background-position: 100px 50px; }
+  50%  { background-position: 50px 100px; }
+  75%  { background-position: 150px 25px; }
+  100% { background-position: 0 0; }
+}
+
+/* ══════════════════════════════════
+   VIGNETTE
+══════════════════════════════════ */
+#vignette {
+  position: fixed;
+  inset: 0;
+  z-index: 35;
+  pointer-events: none;
+  background: radial-gradient(ellipse at center,
+    transparent 40%,
+    rgba(13,9,6,0.55) 100%);
+  opacity: 0;
+}
+
+/* ══════════════════════════════════
+   SCENE OVERLAY (dark fade between scenes)
+══════════════════════════════════ */
+#scene-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 45;
+  background: #0D0906;
+  opacity: 1;
+  pointer-events: none;
+}
+
+/* ══════════════════════════════════
+   TYPOGRAPHY LAYER
+══════════════════════════════════ */
+#typography {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  pointer-events: none;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: flex-end;
+  padding: 8vh 7vw;
+}
+
+.scene-number {
+  font-family: 'Raleway', sans-serif;
+  font-weight: 100;
+  font-size: clamp(10px, 1.1vw, 14px);
+  letter-spacing: 0.35em;
+  color: var(--gold);
+  opacity: 0;
+  transform: translateY(12px);
+  margin-bottom: 1.2vh;
+  text-transform: uppercase;
+}
+
+.praline-name-he {
+  font-family: 'Cormorant Garamond', serif;
+  font-weight: 300;
+  font-style: italic;
+  font-size: clamp(32px, 5.5vw, 72px);
+  color: var(--ivory);
+  line-height: 1.05;
+  opacity: 0;
+  transform: translateY(20px);
+  margin-bottom: 1.4vh;
+  letter-spacing: -0.01em;
+}
+
+.praline-desc {
+  font-family: 'Raleway', sans-serif;
+  font-weight: 200;
+  font-size: clamp(11px, 1.2vw, 15px);
+  letter-spacing: 0.25em;
+  color: var(--warm-gray);
+  opacity: 0;
+  transform: translateY(14px);
+  text-transform: uppercase;
+}
+
+.gold-line {
+  position: absolute;
+  bottom: calc(8vh + 28px);
+  left: 7vw;
+  width: 0;
+  height: 1px;
+  background: var(--gold);
+  opacity: 0;
+}
+
+/* ══════════════════════════════════
+   PROGRESS DOTS
+══════════════════════════════════ */
+#progress {
+  position: fixed;
+  right: 4vw;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 60;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  opacity: 0;
+}
+.dot {
+  width: 5px; height: 5px;
+  border-radius: 50%;
+  background: rgba(245,237,224,0.25);
+  transition: background 0.6s ease, transform 0.6s ease;
+}
+.dot.active {
+  background: var(--gold);
+  transform: scale(1.6);
+}
+
+/* ══════════════════════════════════
+   BRAND OUTRO
+══════════════════════════════════ */
+#outro {
+  position: fixed;
+  inset: 0;
+  z-index: 70;
+  background: var(--chocolate);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  pointer-events: none;
+}
+#outro .brand-line {
+  width: 1px;
+  height: 0;
+  background: var(--gold);
+  margin-bottom: 40px;
+}
+#outro .brand-name {
+  font-family: 'Cormorant Garamond', serif;
+  font-weight: 300;
+  font-style: italic;
+  font-size: clamp(28px, 4vw, 56px);
+  color: var(--ivory);
+  letter-spacing: 0.08em;
+  opacity: 0;
+  transform: translateY(16px);
+}
+#outro .brand-sub {
+  font-family: 'Raleway', sans-serif;
+  font-weight: 100;
+  font-size: clamp(9px, 1vw, 13px);
+  letter-spacing: 0.5em;
+  color: var(--gold);
+  text-transform: uppercase;
+  opacity: 0;
+  margin-top: 18px;
+  transform: translateY(10px);
+}
+
+/* ══════════════════════════════════
+   OPENING TITLE
+══════════════════════════════════ */
+#opening-title {
+  position: fixed;
+  inset: 0;
+  z-index: 65;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+  opacity: 0;
+}
+#opening-title .ot-line {
+  width: 0;
+  height: 1px;
+  background: var(--gold);
+  margin: 18px auto;
+}
+#opening-title .ot-name {
+  font-family: 'Cormorant Garamond', serif;
+  font-weight: 300;
+  font-style: italic;
+  font-size: clamp(24px, 3.5vw, 48px);
+  color: var(--ivory);
+  letter-spacing: 0.12em;
+  opacity: 0;
+  text-align: center;
+}
+#opening-title .ot-sub {
+  font-family: 'Raleway', sans-serif;
+  font-weight: 100;
+  font-size: clamp(9px, 0.9vw, 12px);
+  letter-spacing: 0.55em;
+  color: var(--gold);
+  text-transform: uppercase;
+  opacity: 0;
+  text-align: center;
+}
+
+/* replay button */
+#replay-btn {
+  position: fixed;
+  bottom: 6vh;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 75;
+  padding: 14px 44px;
+  border: 1px solid var(--gold);
+  background: transparent;
+  color: var(--gold);
+  font-family: 'Raleway', sans-serif;
+  font-weight: 200;
+  font-size: 11px;
+  letter-spacing: 0.4em;
+  text-transform: uppercase;
+  cursor: pointer;
+  opacity: 0;
+  pointer-events: none;
+  transition: background 0.4s ease, color 0.4s ease;
+}
+#replay-btn:hover {
+  background: var(--gold);
+  color: var(--chocolate);
+}
+
+</style>
+</head>
+<body>
+
+<div id="stage">
+  <img id="pralines-img" src="video/pic-for-video.png" alt="פרלינים" />
+</div>
+
+<div class="letterbox-top"   id="lb-top"></div>
+<div class="letterbox-bottom" id="lb-bottom"></div>
+<div id="grain"></div>
+<div id="vignette"></div>
+<div id="scene-overlay"></div>
+
+<div id="opening-title">
+  <div class="ot-sub" id="ot-sub">אדונית השוקולד</div>
+  <div class="ot-line" id="ot-line"></div>
+  <div class="ot-name" id="ot-name">הפרלינים שלנו</div>
+</div>
+
+<div id="typography">
+  <div class="gold-line" id="gold-line"></div>
+  <div class="scene-number" id="scene-num"></div>
+  <div class="praline-name-he" id="praline-name"></div>
+  <div class="praline-desc" id="praline-desc"></div>
+</div>
+
+<div id="progress">
+  <!-- dots injected by JS -->
+</div>
+
+<div id="outro">
+  <div class="brand-line" id="outro-line"></div>
+  <div class="brand-name" id="outro-name">אדונית השוקולד</div>
+  <div class="brand-sub" id="outro-sub">שוקולד בוטיק בעבודת יד</div>
+</div>
+
+<button id="replay-btn" onclick="startFilm()">◦ צפו שוב ◦</button>
+
+<script>
+/* ══════════════════════════════════════════════════════════
+   THE FILM DIRECTOR'S SCRIPT
+   Each praline gets its own "shot" — position is defined
+   as the camera target on the full-bleed image.
+
+   The image layout (roughly, image is portrait ~1080x1350):
+   Pralines are centered vertically at ~52% from top.
+   Horizontal positions (center of each praline, % of width):
+
+   1. Crescent moon  : 10%
+   2. Dark truffle   : 22%
+   3. Hamsa coin     : 34%
+   4. White teardrop : 45%
+   5. Milk heart     : 55%
+   6. Rose square    : 65%
+   7. Nut tablet     : 80%
+══════════════════════════════════════════════════════════ */
+
+/*
+  PRECISE CAMERA POSITIONS — mapped to the pralines image.
+  The image is portrait-oriented. Pralines are in a horizontal row
+  centered at ~50% height. We zoom in tightly so ONLY the target
+  praline is visible — no neighbours.
+
+  cx = horizontal center of praline (% of image width)
+  cy = vertical center of praline (% of image height)
+  zoom = scale factor — high enough to fill frame with ONE praline
+
+  Image ratio is approx 0.89 (width/height ~ 1080/1215).
+  On a 16:9 viewport the image is letterboxed horizontally.
+  Effective praline visible width at zoom Z = 100/Z %.
+  Each praline occupies ~9–14% of the image width, so
+  zoom 7–9 ensures isolation.
+*/
+const PRALINES = [
+  {
+    num:  "01",
+    name: "ירח שוקולד",
+    desc: "milk chocolate · fleur de sel",
+    cx: 9,  cy: 50,
+    zoom: 8.0,
+  },
+  {
+    num:  "02",
+    name: "כדור טרופל",
+    desc: "dark ganache · crushed salt",
+    cx: 22, cy: 50,
+    zoom: 8.0,
+  },
+  {
+    num:  "03",
+    name: "חמסה לבנה",
+    desc: "white chocolate · rose water",
+    cx: 34, cy: 50,
+    zoom: 8.5,
+  },
+  {
+    num:  "04",
+    name: "טיפת פנינה",
+    desc: "pure white · vanilla bean",
+    cx: 45, cy: 50,
+    zoom: 9.0,
+  },
+  {
+    num:  "05",
+    name: "לב שוקולד",
+    desc: "milk chocolate · praline cream",
+    cx: 55, cy: 50,
+    zoom: 8.5,
+  },
+  {
+    num:  "06",
+    name: "עלי ורד",
+    desc: "dark chocolate · dried rose petals",
+    cx: 66, cy: 50,
+    zoom: 9.0,
+  },
+  {
+    num:  "07",
+    name: "לוח אגוזים",
+    desc: "milk chocolate bark · roasted hazelnuts",
+    cx: 81, cy: 52,
+    zoom: 5.5,
+  },
+];
+
+/* ══ ANIMATION ENGINE ══ */
+
+const img        = document.getElementById('pralines-img');
+const overlay    = document.getElementById('scene-overlay');
+const vignette   = document.getElementById('vignette');
+const lbTop      = document.getElementById('lb-top');
+const lbBottom   = document.getElementById('lb-bottom');
+const sceneNum   = document.getElementById('scene-num');
+const prName     = document.getElementById('praline-name');
+const prDesc     = document.getElementById('praline-desc');
+const goldLine   = document.getElementById('gold-line');
+const progressEl = document.getElementById('progress');
+const outro      = document.getElementById('outro');
+const openingEl  = document.getElementById('opening-title');
+const replayBtn  = document.getElementById('replay-btn');
+
+// Build progress dots
+PRALINES.forEach((_, i) => {
+  const d = document.createElement('div');
+  d.className = 'dot';
+  d.id = `dot-${i}`;
+  progressEl.appendChild(d);
+});
+
+/* ── Utility: linear interpolation ── */
+function lerp(a, b, t) { return a + (b - a) * t; }
+
+/* ── Utility: Promise-based sleep ── */
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+
+/* ── Transition: set image transform to show specific praline ── */
+function setCamera(cx, cy, zoom, duration = 1800, easing = 'cubic-bezier(0.25,0.46,0.45,0.94)') {
+  // We need to translate so that point (cx%, cy%) of the image is at viewport center
+  // With scale(zoom), the image point at (cx%, cy%) needs to map to 50vw, 50vh
+  // translateX = (50 - cx) * zoom%  of image width
+  // Since image is 100vw at scale 1, translateX% is relative to the element
+  const tx = (50 - cx) * zoom;
+  const ty = (50 - cy) * zoom;
+
+  img.style.transition = `transform ${duration}ms ${easing}`;
+  img.style.transform = `scale(${zoom}) translate(${tx / zoom}%, ${ty / zoom}%)`;
+  // simpler direct approach:
+  img.style.transformOrigin = `${cx}% ${cy}%`;
+  img.style.transform = `scale(${zoom})`;
+}
+
+/* ── Transition: reset image to full overview ── */
+function setCameraFull(duration = 2200) {
+  img.style.transition = `transform ${duration}ms cubic-bezier(0.25,0.46,0.45,0.94)`;
+  img.style.transformOrigin = 'center center';
+  img.style.transform = 'scale(1)';
+}
+
+/* ── Fade element in ── */
+function fadeIn(el, duration, delay = 0, opts = {}) {
+  return new Promise(resolve => {
+    el.style.transition = `opacity ${duration}ms ease, transform ${duration}ms ease`;
+    if (opts.fromY !== undefined) el.style.transform = `translateY(${opts.fromY}px)`;
+    el.style.transitionDelay = delay + 'ms';
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        el.style.opacity = opts.toOpacity ?? '1';
+        if (opts.fromY !== undefined) el.style.transform = 'translateY(0)';
+        setTimeout(resolve, duration + delay);
+      });
+    });
+  });
+}
+
+/* ── Fade element out ── */
+function fadeOut(el, duration, delay = 0) {
+  return new Promise(resolve => {
+    el.style.transitionDelay = delay + 'ms';
+    el.style.transition = `opacity ${duration}ms ease`;
+    el.style.opacity = '0';
+    setTimeout(resolve, duration + delay);
+  });
+}
+
+/* ── Animate width (gold line) ── */
+function expandLine(el, toWidth, duration, delay = 0) {
+  return new Promise(resolve => {
+    el.style.transitionDelay = delay + 'ms';
+    el.style.transition = `width ${duration}ms cubic-bezier(0.25,0.46,0.45,0.94), opacity 600ms ease`;
+    el.style.opacity = '0.6';
+    el.style.width = toWidth;
+    setTimeout(resolve, duration + delay);
+  });
+}
+
+function collapseLine(el, duration, delay = 0) {
+  el.style.transitionDelay = delay + 'ms';
+  el.style.transition = `width ${duration}ms ease, opacity ${duration}ms ease`;
+  el.style.width = '0';
+  el.style.opacity = '0';
+}
+
+/* ── Letterbox open/close ── */
+function openLetterbox(duration = 800) {
+  lbTop.style.transition    = `height ${duration}ms cubic-bezier(0.77,0,0.175,1)`;
+  lbBottom.style.transition = `height ${duration}ms cubic-bezier(0.77,0,0.175,1)`;
+  lbTop.style.height    = '9vh';
+  lbBottom.style.height = '9vh';
+  return sleep(duration);
+}
+
+function closeLetterbox(duration = 800) {
+  lbTop.style.transition    = `height ${duration}ms cubic-bezier(0.77,0,0.175,1)`;
+  lbBottom.style.transition = `height ${duration}ms cubic-bezier(0.77,0,0.175,1)`;
+  lbTop.style.height    = '0';
+  lbBottom.style.height = '0';
+  return sleep(duration);
+}
+
+/* ── Clear scene typography ── */
+async function clearTypography(fast = false) {
+  const dur = fast ? 300 : 500;
+  collapseLine(goldLine);
+  sceneNum.style.transition = `opacity ${dur}ms ease, transform ${dur}ms ease`;
+  prName.style.transition   = `opacity ${dur}ms ease, transform ${dur}ms ease`;
+  prDesc.style.transition   = `opacity ${dur}ms ease, transform ${dur}ms ease`;
+  sceneNum.style.opacity = '0';
+  prName.style.opacity   = '0';
+  prDesc.style.opacity   = '0';
+  sceneNum.style.transform = 'translateY(-8px)';
+  prName.style.transform   = 'translateY(-8px)';
+  prDesc.style.transform   = 'translateY(-8px)';
+  return sleep(dur);
+}
+
+/* ── Show scene typography ── */
+async function showTypography(praline, dotIndex) {
+  // Reset positions
+  sceneNum.style.transform = 'translateY(12px)';
+  prName.style.transform   = 'translateY(20px)';
+  prDesc.style.transform   = 'translateY(14px)';
+
+  sceneNum.textContent = praline.num + ' — ' + (7 - dotIndex > 0 ? PRALINES.length : '');
+  sceneNum.textContent = praline.num;
+  prName.textContent   = praline.name;
+  prDesc.textContent   = praline.desc;
+
+  // Update dots
+  document.querySelectorAll('.dot').forEach((d, i) => {
+    d.classList.toggle('active', i === dotIndex);
+  });
+
+  // Staggered reveals
+  expandLine(goldLine, '60px', 600, 0);
+  await fadeIn(sceneNum, 600, 100, { fromY: 12 });
+  await fadeIn(prName,   700, 0,   { fromY: 20 });
+  await fadeIn(prDesc,   600, 0,   { fromY: 14 });
+}
+
+/* ══════════════════════════════════════════════════════════
+   THE MAIN FILM SEQUENCE
+══════════════════════════════════════════════════════════ */
+async function startFilm() {
+  // Reset everything
+  replayBtn.style.opacity = '0';
+  replayBtn.style.pointerEvents = 'none';
+  outro.style.opacity = '0';
+  outro.style.pointerEvents = 'none';
+  progressEl.style.opacity = '0';
+  openingEl.style.opacity = '0';
+
+  document.getElementById('ot-sub').style.opacity  = '0';
+  document.getElementById('ot-name').style.opacity = '0';
+  document.getElementById('ot-line').style.width   = '0';
+  document.getElementById('outro-line').style.height = '0';
+  document.getElementById('outro-name').style.opacity = '0';
+  document.getElementById('outro-sub').style.opacity  = '0';
+
+  setCameraFull(1);
+  img.style.transition = 'none';
+  img.style.transform = 'scale(1)';
+  img.style.transformOrigin = 'center center';
+  vignette.style.opacity = '0';
+  lbTop.style.height = '0';
+  lbBottom.style.height = '0';
+  await clearTypography(true);
+
+  // ── 1. FADE IN FROM BLACK ──
+  overlay.style.opacity = '1';
+  await sleep(300);
+
+  // ── 2. REVEAL FULL IMAGE ──
+  overlay.style.transition = 'opacity 2200ms ease';
+  overlay.style.opacity = '0';
+  await sleep(1000);
+
+  // ── 3. OPENING TITLE (over the full image) ──
+  openingEl.style.opacity = '1';
+  const otSub  = document.getElementById('ot-sub');
+  const otLine = document.getElementById('ot-line');
+  const otName = document.getElementById('ot-name');
+
+  otSub.style.transition  = 'opacity 900ms ease, transform 900ms ease';
+  otSub.style.transform   = 'translateY(10px)';
+  otSub.style.opacity     = '0';
+  await sleep(100);
+  otSub.style.opacity    = '1';
+  otSub.style.transform  = 'translateY(0)';
+  await sleep(600);
+
+  otLine.style.transition = 'width 800ms cubic-bezier(0.25,0.46,0.45,0.94)';
+  otLine.style.width = '80px';
+  await sleep(700);
+
+  otName.style.transition = 'opacity 900ms ease, transform 900ms ease';
+  otName.style.transform  = 'translateY(14px)';
+  otName.style.opacity    = '0';
+  await sleep(100);
+  otName.style.opacity    = '1';
+  otName.style.transform  = 'translateY(0)';
+  await sleep(2400);
+
+  // Fade out opening title
+  openingEl.style.transition = 'opacity 900ms ease';
+  openingEl.style.opacity    = '0';
+  await sleep(900);
+
+  // ── 4. LETTERBOX IN ──
+  await openLetterbox(700);
+  fadeIn(vignette, 800, 0, { toOpacity: '1' });
+  await sleep(300);
+
+  // Show progress dots
+  progressEl.style.transition = 'opacity 600ms ease';
+  progressEl.style.opacity = '1';
+
+  // ── 5. THE 7 PRALINE SCENES ──
+  for (let i = 0; i < PRALINES.length; i++) {
+    const p = PRALINES[i];
+
+    // Subtle flash-to-dark between scenes (except first)
+    if (i > 0) {
+      overlay.style.transition = 'opacity 400ms ease';
+      overlay.style.opacity = '0.6';
+      await sleep(350);
+    }
+
+    // Set camera to this praline — slow cinematic zoom
+    setCamera(p.cx, p.cy, p.zoom, 0);
+    // Animate in
+    img.style.transition = 'none';
+    img.style.transformOrigin = `${p.cx}% ${p.cy}%`;
+    img.style.transform = `scale(${p.zoom * 0.85})`;
+
+    if (i > 0) {
+      overlay.style.transition = 'opacity 700ms ease';
+      overlay.style.opacity = '0';
+    }
+
+    // Slow cinematic push in
+    await sleep(50);
+    img.style.transition = `transform 3800ms cubic-bezier(0.25,0.46,0.45,0.94)`;
+    img.style.transform = `scale(${p.zoom})`;
+
+    // Show typography
+    await sleep(i === 0 ? 200 : 400);
+    await showTypography(p, i);
+
+    // Hold on this praline
+    await sleep(2600);
+
+    // Clear typography before moving
+    await clearTypography();
+    await sleep(300);
+  }
+
+  // ── 6. PULL BACK TO FULL OVERVIEW ──
+  overlay.style.transition = 'opacity 500ms ease';
+  overlay.style.opacity = '0.5';
+  await sleep(400);
+
+  img.style.transition = 'none';
+  img.style.transformOrigin = 'center center';
+  img.style.transform = 'scale(1.15)';
+
+  overlay.style.transition = 'opacity 800ms ease';
+  overlay.style.opacity = '0';
+
+  await sleep(100);
+  img.style.transition = 'transform 2800ms cubic-bezier(0.25,0.46,0.45,0.94)';
+  img.style.transform = 'scale(1)';
+
+  // Fade out vignette & letterbox
+  fadeOut(vignette, 1000);
+  closeLetterbox(900);
+  progressEl.style.transition = 'opacity 600ms ease';
+  progressEl.style.opacity = '0';
+  document.querySelectorAll('.dot').forEach(d => d.classList.remove('active'));
+
+  await sleep(2200);
+
+  // ── 7. FADE TO OUTRO ──
+  overlay.style.transition = 'opacity 1400ms ease';
+  overlay.style.opacity = '1';
+  await sleep(1400);
+
+  // Show outro
+  outro.style.transition = 'opacity 800ms ease';
+  outro.style.opacity = '1';
+  outro.style.pointerEvents = 'auto';
+  await sleep(200);
+
+  // Animate outro elements
+  const outroBrandLine = document.getElementById('outro-line');
+  const outroBrandName = document.getElementById('outro-name');
+  const outroBrandSub  = document.getElementById('outro-sub');
+
+  outroBrandLine.style.transition = 'height 900ms cubic-bezier(0.25,0.46,0.45,0.94)';
+  outroBrandLine.style.height = '60px';
+  await sleep(700);
+
+  outroBrandName.style.transition = 'opacity 900ms ease, transform 900ms ease';
+  outroBrandName.style.transform  = 'translateY(16px)';
+  await sleep(80);
+  outroBrandName.style.opacity    = '1';
+  outroBrandName.style.transform  = 'translateY(0)';
+  await sleep(700);
+
+  outroBrandSub.style.transition = 'opacity 800ms ease, transform 800ms ease';
+  outroBrandSub.style.transform  = 'translateY(10px)';
+  await sleep(80);
+  outroBrandSub.style.opacity    = '1';
+  outroBrandSub.style.transform  = 'translateY(0)';
+  await sleep(1200);
+
+  // Show replay button
+  replayBtn.style.transition    = 'opacity 700ms ease';
+  replayBtn.style.opacity       = '1';
+  replayBtn.style.pointerEvents = 'auto';
+}
+
+// Auto-start
+window.addEventListener('load', () => {
+  setTimeout(startFilm, 400);
+});
+</script>
+</body>
+</html>

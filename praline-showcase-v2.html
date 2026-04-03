@@ -1,0 +1,680 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>אדונית השוקולד — The Collection</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400;1,500&family=Frank+Ruhl+Libre:wght@300;400;500&family=Rubik:wght@200;300;400&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --choc:       #1a0c08;
+      --gold:       #c9a86e;
+      --gold-light: #d4b87a;
+      --gold-pale:  #e8d0a8;
+      --cream:      #f0e6d0;
+      --stone:      #c4b298;
+      --stone-bg:   #EAE0D6;
+      --serif:      'Cormorant Garamond', 'Frank Ruhl Libre', serif;
+      --sans:       'Rubik', sans-serif;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      background: #111;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      overflow: hidden;
+    }
+
+    /* ── Stage ─────────────────────────────────────── */
+    .stage {
+      position: relative;
+      width: min(390px, 100vw);
+      aspect-ratio: 9 / 16;
+      background: var(--stone-bg);
+      overflow: hidden;
+    }
+
+    /* ── Image layers ───────────────────────────────── */
+    .img-layer {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .img-layer img {
+      will-change: transform, opacity, filter;
+    }
+
+    #layer-group {
+      z-index: 1;
+      opacity: 1;
+      transition:
+        opacity 1.4s cubic-bezier(0.76, 0, 0.24, 1),
+        filter  1.4s cubic-bezier(0.76, 0, 0.24, 1);
+    }
+
+    #layer-group img {
+      width: 88%;
+      height: 88%;
+      object-fit: contain;
+      transition: transform 1.4s cubic-bezier(0.76, 0, 0.24, 1);
+    }
+
+    #layer-group.dimmed {
+      opacity: 0.08;
+      filter: blur(3px);
+    }
+
+    #layer-group.dimmed img {
+      transform: scale(0.97);
+    }
+
+    #layer-praline {
+      z-index: 2;
+      opacity: 0;
+      filter: blur(10px);
+      transition:
+        opacity 1.4s cubic-bezier(0.76, 0, 0.24, 1),
+        filter  1.4s cubic-bezier(0.76, 0, 0.24, 1);
+    }
+
+    #layer-praline img {
+      width: 78%;
+      height: 78%;
+      object-fit: contain;
+      transform: scale(0.90) translateY(10px);
+      transition: transform 1.5s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    #layer-praline.in {
+      opacity: 1;
+      filter: blur(0px);
+    }
+
+    #layer-praline.in img {
+      transform: scale(1) translateY(0);
+    }
+
+    /* smooth exit — floats up and fades */
+    #layer-praline.in.exiting {
+      opacity: 0;
+      filter: blur(6px);
+    }
+
+    #layer-praline.in.exiting img {
+      transform: scale(1.05) translateY(-10px) !important;
+      animation: none !important;
+    }
+
+    /* subtle breathe loop while visible */
+    @keyframes breathe {
+      0%,100% { transform: scale(1) translateY(0); }
+      50%      { transform: scale(1.018) translateY(-3px); }
+    }
+
+    #layer-praline.breathe img {
+      animation: breathe 4s ease-in-out infinite;
+    }
+
+    /* ── Vignette overlay always present ───────────── */
+    .vignette {
+      position: absolute;
+      inset: 0;
+      z-index: 5;
+      pointer-events: none;
+      background: radial-gradient(ellipse at 50% 50%,
+        transparent 55%,
+        rgba(26,12,8,0.18) 100%);
+    }
+
+    /* ── Gold vertical thread ───────────────────────── */
+    .gold-thread {
+      position: absolute;
+      top: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 1px;
+      z-index: 10;
+      pointer-events: none;
+      overflow: hidden;
+      height: 13%;
+    }
+
+    .gold-thread-inner {
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(to bottom,
+        transparent 0%,
+        var(--gold) 50%,
+        transparent 100%);
+      transform: translateY(-100%);
+      transition: transform 1.1s cubic-bezier(0.76, 0, 0.24, 1);
+    }
+
+    .gold-thread.drop .gold-thread-inner {
+      transform: translateY(0);
+    }
+
+    /* ── Text block ─────────────────────────────────── */
+    .text-block {
+      position: absolute;
+      bottom: 13%;
+      left: 0;
+      right: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      z-index: 12;
+      pointer-events: none;
+    }
+
+    /* individual line animations */
+    .t-num,
+    .t-name,
+    .t-rule,
+    .t-sub,
+    .t-quote {
+      opacity: 0;
+      transform: translateY(14px);
+      transition:
+        opacity 0.9s ease,
+        transform 0.9s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .text-block.show .t-num   { opacity: 1; transform: translateY(0); transition-delay: 0.00s; }
+    .text-block.show .t-name  { opacity: 1; transform: translateY(0); transition-delay: 0.12s; }
+    .text-block.show .t-rule  { opacity: 1; transform: translateY(0); transition-delay: 0.24s; }
+    .text-block.show .t-sub   { opacity: 1; transform: translateY(0); transition-delay: 0.34s; }
+    .text-block.show .t-quote { opacity: 1; transform: translateY(0); transition-delay: 0.46s; }
+
+    .t-num {
+      font-family: var(--sans);
+      font-weight: 200;
+      font-size: clamp(0.45rem, 1.5vw, 0.52rem);
+      letter-spacing: 0.32em;
+      color: var(--gold);
+      text-transform: uppercase;
+      margin-bottom: 6px;
+    }
+
+    .t-name {
+      font-family: var(--sans);
+      font-style: normal;
+      font-weight: 300;
+      font-size: clamp(1.6rem, 6.5vw, 2.1rem);
+      color: #4a2c1a;
+      letter-spacing: 0.06em;
+      line-height: 1;
+    }
+
+    .t-rule {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      margin: 10px 0 8px;
+    }
+
+    .t-rule-line {
+      width: 22px;
+      height: 1px;
+      background: var(--gold);
+    }
+
+    .t-diamond {
+      font-size: 0.3rem;
+      color: var(--gold);
+      line-height: 1;
+    }
+
+    .t-sub {
+      font-family: var(--sans);
+      font-weight: 200;
+      font-size: clamp(0.47rem, 1.6vw, 0.54rem);
+      letter-spacing: 0.22em;
+      color: #c4a882;
+      text-transform: uppercase;
+    }
+
+    .t-quote {
+      font-family: var(--sans);
+      font-style: normal;
+      font-weight: 200;
+      font-size: clamp(0.72rem, 2.5vw, 0.85rem);
+      color: #6b3d22;
+      opacity: 0;
+      margin-top: 9px;
+      letter-spacing: 0.03em;
+    }
+
+    /* override opacity-0 default: quote fades to 0.45 when shown */
+    .text-block.show .t-quote {
+      opacity: 0.42;
+    }
+
+    /* ── Progress dots ──────────────────────────────── */
+    .dots {
+      position: absolute;
+      bottom: 5%;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      gap: 7px;
+      z-index: 20;
+    }
+
+    .dot {
+      width: 3.5px;
+      height: 3.5px;
+      border-radius: 50%;
+      background: var(--choc);
+      opacity: 0.15;
+      transition: opacity 0.4s ease, transform 0.4s cubic-bezier(0.34,1.56,0.64,1);
+    }
+
+    .dot.active {
+      background: var(--gold);
+      opacity: 1;
+      transform: scale(1.6);
+    }
+
+    /* ── Intro ──────────────────────────────────────── */
+    .intro-overlay {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(160deg, #ede3d8 0%, #e0d0be 100%);
+      z-index: 30;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 0;
+      opacity: 1;
+      transition: opacity 1.2s cubic-bezier(0.76, 0, 0.24, 1);
+    }
+
+    .intro-overlay.out {
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .intro-eyebrow {
+      font-family: var(--sans);
+      font-weight: 200;
+      font-size: clamp(0.42rem, 1.4vw, 0.5rem);
+      letter-spacing: 0.42em;
+      color: var(--gold);
+      text-transform: uppercase;
+      opacity: 0;
+      transition: opacity 1.1s ease 0.3s;
+    }
+
+    .intro-eyebrow.show { opacity: 1; }
+
+    .intro-title {
+      font-family: var(--sans);
+      font-weight: 300;
+      font-size: clamp(2.1rem, 8vw, 2.7rem);
+      color: #3a1e0e;
+      letter-spacing: 0.08em;
+      margin: 18px 0 6px;
+      opacity: 0;
+      transform: translateY(18px);
+      transition: opacity 1.2s ease 0.1s, transform 1.2s cubic-bezier(0.16,1,0.3,1) 0.1s;
+    }
+
+    .intro-title.show {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .intro-subtitle {
+      font-family: var(--sans);
+      font-weight: 200;
+      font-size: clamp(0.5rem, 1.7vw, 0.6rem);
+      letter-spacing: 0.28em;
+      color: #b8977a;
+      text-transform: uppercase;
+      opacity: 0;
+      margin-bottom: 20px;
+      transition: opacity 1s ease 0.25s;
+    }
+
+    .intro-subtitle.show { opacity: 1; }
+
+    .intro-rule {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      opacity: 0;
+      transition: opacity 0.9s ease 0.6s;
+    }
+
+    .intro-rule.show { opacity: 1; }
+
+    .intro-rule-line { width: 32px; height: 1px; background: var(--gold); opacity: 0.7; }
+    .intro-rule-diam { font-size: 0.28rem; color: var(--gold); }
+
+    /* ── Outro ──────────────────────────────────────── */
+    .outro-overlay {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(160deg, #ede3d8 0%, #e0d0be 100%);
+      z-index: 25;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding-bottom: 4%;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 1.4s cubic-bezier(0.76, 0, 0.24, 1);
+    }
+
+    .outro-overlay.visible { opacity: 1; }
+
+    .outro-rule-top {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      margin-bottom: 22px;
+      opacity: 0.7;
+    }
+    .outro-rule-top-line { width: 26px; height: 1px; background: var(--gold); }
+    .outro-rule-top-diam { font-size: 0.28rem; color: var(--gold); }
+
+    .outro-tagline {
+      font-family: var(--sans);
+      font-weight: 200;
+      font-size: clamp(0.5rem, 1.7vw, 0.6rem);
+      letter-spacing: 0.3em;
+      color: #b8977a;
+      text-transform: uppercase;
+      margin-bottom: 16px;
+    }
+
+    .outro-brand {
+      font-family: var(--sans);
+      font-weight: 300;
+      font-size: clamp(1.9rem, 7.5vw, 2.5rem);
+      color: #3a1e0e;
+      letter-spacing: 0.1em;
+    }
+
+    .outro-sub {
+      font-family: var(--sans);
+      font-weight: 200;
+      font-size: clamp(0.42rem, 1.4vw, 0.5rem);
+      letter-spacing: 0.38em;
+      color: var(--gold);
+      text-transform: uppercase;
+      margin-top: 14px;
+      opacity: 0.85;
+    }
+
+    .outro-rule {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      margin-top: 20px;
+    }
+
+    .outro-rule-line { width: 22px; height: 1px; background: var(--gold); opacity: 0.5; }
+    .outro-rule-diam { font-size: 0.28rem; color: var(--gold); opacity: 0.7; }
+  </style>
+</head>
+<body>
+
+<div class="stage" id="stage">
+
+  <!-- Group shot -->
+  <div class="img-layer" id="layer-group">
+    <img src="video/pic-for-video.png" alt="">
+  </div>
+
+  <!-- Individual praline -->
+  <div class="img-layer" id="layer-praline">
+    <img id="praline-img" src="" alt="">
+  </div>
+
+  <!-- Vignette -->
+  <div class="vignette"></div>
+
+  <!-- Gold thread top -->
+  <div class="gold-thread" id="gold-thread">
+    <div class="gold-thread-inner"></div>
+  </div>
+
+  <!-- Text -->
+  <div class="text-block" id="text-block">
+    <div class="t-num"  id="t-num"></div>
+    <div class="t-name" id="t-name"></div>
+    <div class="t-rule">
+      <div class="t-rule-line"></div>
+      <span class="t-diamond">◆</span>
+      <div class="t-rule-line"></div>
+    </div>
+    <div class="t-sub"   id="t-sub"></div>
+    <div class="t-quote" id="t-quote"></div>
+  </div>
+
+  <!-- Progress dots -->
+  <div class="dots" id="dots"></div>
+
+  <!-- Intro -->
+  <div class="intro-overlay" id="intro-overlay">
+    <div class="intro-eyebrow"  id="intro-eyebrow">Artisan Chocolate · Boutique</div>
+    <div class="intro-title"    id="intro-title">אדונית השוקולד</div>
+    <div class="intro-subtitle" id="intro-subtitle">The Collection</div>
+    <div class="intro-rule"     id="intro-rule">
+      <div class="intro-rule-line"></div>
+      <span class="intro-rule-diam">◆</span>
+      <div class="intro-rule-line"></div>
+    </div>
+  </div>
+
+  <!-- Outro -->
+  <div class="outro-overlay" id="outro-overlay">
+    <div class="outro-rule-top">
+      <div class="outro-rule-top-line"></div>
+      <span class="outro-rule-top-diam">◆</span>
+      <div class="outro-rule-top-line"></div>
+    </div>
+    <div class="outro-tagline">שבעה רגעים · שוקולד אחד</div>
+    <div class="outro-brand">אדונית השוקולד</div>
+    <div class="outro-sub">Handcrafted with love</div>
+    <div class="outro-rule">
+      <div class="outro-rule-line"></div>
+      <span class="outro-rule-diam">◆</span>
+      <div class="outro-rule-line"></div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+  // ── Praline data — language & tone from the site ──────────────────
+  const pralines = [
+    {
+      img:   'video/img_0591.png',
+      num:   '— 01 —',
+      name:  'שוקולד חלב',
+      sub:   'שוקולד חלב בלגי · בעבודת יד',
+      quote: '"רגע אחד שנמס לאט"'
+    },
+    {
+      img:   'video/img_0590.png',
+      num:   '— 02 —',
+      name:  'פרלין עיגול',
+      sub:   'פרלינה קלאסית · ניצוץ זהב',
+      quote: '"חיצוני מושלם, פנימי מפתיע"'
+    },
+    {
+      img:   'video/img_0586.png',
+      num:   '— 03 —',
+      name:  'קונכייה לבנה',
+      sub:   'שוקולד לבן · וניל בורבון טהור',
+      quote: '"צורה שנולדת מתוך השקט"'
+    },
+    {
+      img:   'video/img_0587.png',
+      num:   '— 04 —',
+      name:  'פרלין חמסה לבן',
+      sub:   'שוקולד לבן בלגי · חמסה בעבודת יד',
+      quote: '"מוגן, מאהב, מועבר ביד"'
+    },
+    {
+      img:   'video/img_0588.png',
+      num:   '— 05 —',
+      name:  'לב שוקולד חלב',
+      sub:   'שוקולד חלב בלגי · מרקם משיי',
+      quote: '"כי אהבה גם טועמים"'
+    },
+    {
+      img:   'video/img_0585.png',
+      num:   '— 06 —',
+      name:  'פרלין חום ורדים',
+      sub:   'שוקולד מריר · עלי ורד אמיתיים',
+      quote: '"הטבע בתוך כל ביס"'
+    },
+    {
+      img:   'video/img_0584.png',
+      num:   '— 07 —',
+      name:  'שוקולד שקדים',
+      sub:   'שוקולד חלב · שקדים קלויים',
+      quote: '"האדמה, הגרעין, הקסם"'
+    },
+  ];
+
+  // ── DOM ────────────────────────────────────────────────────────────
+  const layerGroup   = document.getElementById('layer-group');
+  const layerPraline = document.getElementById('layer-praline');
+  const pralineImg   = document.getElementById('praline-img');
+  const goldThread   = document.getElementById('gold-thread');
+  const textBlock    = document.getElementById('text-block');
+  const tNum         = document.getElementById('t-num');
+  const tName        = document.getElementById('t-name');
+  const tSub         = document.getElementById('t-sub');
+  const tQuote       = document.getElementById('t-quote');
+  const dotsEl       = document.getElementById('dots');
+  const introOverlay   = document.getElementById('intro-overlay');
+  const introEyebrow   = document.getElementById('intro-eyebrow');
+  const introTitle     = document.getElementById('intro-title');
+  const introSubtitle  = document.getElementById('intro-subtitle');
+  const introRule      = document.getElementById('intro-rule');
+  const outroOverlay = document.getElementById('outro-overlay');
+
+  // ── Build dots ────────────────────────────────────────────────────
+  pralines.forEach((_, i) => {
+    const d = document.createElement('div');
+    d.className = 'dot';
+    d.id = `dot-${i}`;
+    dotsEl.appendChild(d);
+  });
+
+  function setDot(i) {
+    document.querySelectorAll('.dot').forEach(d => d.classList.remove('active'));
+    if (i >= 0) document.getElementById(`dot-${i}`).classList.add('active');
+  }
+
+  // ── Preload ───────────────────────────────────────────────────────
+  pralines.forEach(p => { const img = new Image(); img.src = p.img; });
+
+  const wait = ms => new Promise(r => setTimeout(r, ms));
+
+  // ── Intro (~3.5s) ─────────────────────────────────────────────────
+  async function playIntro() {
+    await wait(350);
+    introEyebrow.classList.add('show');
+    introTitle.classList.add('show');
+    introSubtitle.classList.add('show');
+    await wait(700);
+    introRule.classList.add('show');
+    await wait(1600);
+    introOverlay.classList.add('out');
+    await wait(1400);
+  }
+
+  // ── Per praline (~5s each, slow & cinematic) ─────────────────────
+  async function showPraline(i) {
+    const p = pralines[i];
+
+    // Load content before any transition
+    pralineImg.src  = p.img;
+    tNum.textContent   = p.num;
+    tName.textContent  = p.name;
+    tSub.textContent   = p.sub;
+    tQuote.textContent = p.quote;
+    setDot(i);
+
+    // Dim group, bring praline forward
+    layerGroup.classList.add('dimmed');
+    layerPraline.classList.add('in');
+
+    // Gold thread drops — wait for image to settle
+    await wait(500);
+    goldThread.classList.add('drop');
+
+    // Text enters (staggered via CSS delay)
+    await wait(700);
+    textBlock.classList.add('show');
+
+    // Add breathe after text is fully in
+    await wait(800);
+    layerPraline.classList.add('breathe');
+
+    // Long cinematic hold
+    await wait(2200);
+
+    // Text exits gracefully
+    textBlock.classList.remove('show');
+    goldThread.classList.remove('drop');
+
+    // Wait for text to fade, then exit image smoothly
+    await wait(600);
+
+    // Smooth exit: stop breathe, float up and fade out together
+    layerPraline.classList.remove('breathe');
+    layerPraline.classList.add('exiting');
+
+    // Bring group back simultaneously
+    layerGroup.classList.remove('dimmed');
+
+    // Wait for exit transition to complete
+    await wait(1400);
+
+    // Now invisible — safe to snap back without visual glitch
+    layerPraline.classList.remove('in', 'exiting');
+
+    // Pause between slides
+    await wait(400);
+  }
+
+  // ── Outro ─────────────────────────────────────────────────────────
+  async function playOutro() {
+    setDot(-1);
+    await wait(200);
+    outroOverlay.classList.add('visible');
+  }
+
+  // ── Run ───────────────────────────────────────────────────────────
+  async function run() {
+    await playIntro();
+    for (let i = 0; i < pralines.length; i++) {
+      await showPraline(i);
+    }
+    await playOutro();
+  }
+
+  run();
+</script>
+</body>
+</html>

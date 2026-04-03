@@ -1,0 +1,19 @@
+# Query: תמונה3
+# ContextLines: 1
+
+3 results - 3 files
+
+index.html:
+  2583                <div class="circ-card-inner">
+  2584:                 <img src="photos/תמונה3.jpg" alt="יצירה 3" loading="lazy" />
+  2585                  <div class="circ-card-overlay"></div>
+
+pralines-showcase.html:
+  536    <div class="praline-photo">
+  537:     <img src="photos/תמונה3.jpg" alt="פרלין פיסטוק ורד">
+  538    </div>
+
+scroll-film.html:
+  805      <div class="lifestyle-item">
+  806:       <img src="photos/תמונה3.jpg" alt="">
+  807        <div class="lifestyle-item-caption">

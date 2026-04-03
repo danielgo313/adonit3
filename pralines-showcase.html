@@ -1,0 +1,842 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>אדונית השוקולד — הפרלינים שלנו</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400;1,500&family=Raleway:wght@100;200;300;400&display=swap" rel="stylesheet">
+
+<style>
+  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --chocolate:   #2A1A14;
+    --chocolate-mid: #3D2418;
+    --cream:       #F5EDE0;
+    --ivory:       #FAF6EE;
+    --gold:        #B8945A;
+    --gold-light:  #D4AF72;
+    --warm-gray:   #C4B09A;
+    --text-dark:   #1A0F0A;
+  }
+
+  html { scroll-behavior: auto; }
+
+  body {
+    background: var(--chocolate);
+    color: var(--cream);
+    font-family: 'Raleway', sans-serif;
+    font-weight: 200;
+    overflow-x: hidden;
+    cursor: none;
+  }
+
+  /* ── Custom Cursor ── */
+  .cursor {
+    position: fixed;
+    width: 8px; height: 8px;
+    background: var(--gold);
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 9999;
+    transform: translate(-50%, -50%);
+    transition: transform .1s ease, width .3s ease, height .3s ease, background .3s ease;
+    mix-blend-mode: normal;
+  }
+  .cursor-ring {
+    position: fixed;
+    width: 36px; height: 36px;
+    border: 1px solid rgba(184,148,90,0.5);
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 9998;
+    transform: translate(-50%, -50%);
+    transition: transform .18s ease, width .3s ease, height .3s ease;
+  }
+  .cursor.hover { width: 14px; height: 14px; background: var(--gold-light); }
+  .cursor-ring.hover { width: 56px; height: 56px; border-color: var(--gold); }
+
+  /* ── Opening Scene ── */
+  #opening {
+    position: relative;
+    width: 100vw;
+    height: 100vh;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  #opening .bg-image {
+    position: absolute;
+    inset: 0;
+    background: url('image.jpeg') center center / cover no-repeat;
+    transform-origin: center;
+    will-change: transform;
+  }
+
+  #opening .overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      to bottom,
+      rgba(42,26,20,0.15) 0%,
+      rgba(42,26,20,0.45) 60%,
+      rgba(42,26,20,0.9) 100%
+    );
+  }
+
+  #opening .content {
+    position: relative;
+    z-index: 2;
+    text-align: center;
+    padding: 0 2rem;
+  }
+
+  #opening .eyebrow {
+    font-family: 'Raleway', sans-serif;
+    font-weight: 200;
+    font-size: clamp(.65rem, 1.2vw, .8rem);
+    letter-spacing: .45em;
+    color: var(--gold);
+    text-transform: uppercase;
+    margin-bottom: 1.8rem;
+    opacity: 0;
+  }
+
+  #opening h1 {
+    font-family: 'Cormorant Garamond', serif;
+    font-weight: 300;
+    font-size: clamp(3rem, 9vw, 8rem);
+    line-height: 1.05;
+    color: var(--cream);
+    letter-spacing: .02em;
+    margin-bottom: 1.4rem;
+    opacity: 0;
+  }
+
+  #opening h1 em {
+    font-style: italic;
+    font-weight: 400;
+    color: var(--gold-light);
+  }
+
+  #opening .sub {
+    font-family: 'Raleway', sans-serif;
+    font-weight: 200;
+    font-size: clamp(.75rem, 1.5vw, .95rem);
+    letter-spacing: .3em;
+    color: var(--warm-gray);
+    text-transform: uppercase;
+    opacity: 0;
+  }
+
+  #opening .scroll-hint {
+    position: absolute;
+    bottom: 2.5rem;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 3;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: .6rem;
+    opacity: 0;
+  }
+
+  #opening .scroll-hint span {
+    font-family: 'Raleway', sans-serif;
+    font-weight: 200;
+    font-size: .65rem;
+    letter-spacing: .4em;
+    color: var(--gold);
+    text-transform: uppercase;
+  }
+
+  .scroll-line {
+    width: 1px;
+    height: 50px;
+    background: linear-gradient(to bottom, var(--gold), transparent);
+    animation: scrollPulse 2s ease-in-out infinite;
+  }
+
+  @keyframes scrollPulse {
+    0%, 100% { transform: scaleY(1); opacity: .7; }
+    50% { transform: scaleY(.5); opacity: 1; }
+  }
+
+  /* ── Praline Sections ── */
+  .praline-section {
+    position: relative;
+    width: 100vw;
+    height: 100vh;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+  }
+
+  .praline-section .scene-bg {
+    position: absolute;
+    inset: 0;
+    will-change: transform;
+  }
+
+  /* Individual scene backgrounds */
+  .scene-1 .scene-bg { background: radial-gradient(ellipse 80% 80% at 30% 60%, #1a0e09 0%, #2A1A14 40%, #1a0e09 100%); }
+  .scene-2 .scene-bg { background: radial-gradient(ellipse 90% 70% at 70% 40%, #241510 0%, #2d1a0e 40%, #1a0e09 100%); }
+  .scene-3 .scene-bg { background: radial-gradient(ellipse 80% 80% at 40% 55%, #1f1710 0%, #2A1A14 50%, #150d09 100%); }
+  .scene-4 .scene-bg { background: radial-gradient(ellipse 70% 90% at 60% 45%, #221610 0%, #2d1a0e 45%, #1a0d08 100%); }
+  .scene-5 .scene-bg { background: radial-gradient(ellipse 85% 75% at 35% 50%, #1e1208 0%, #2A1A14 40%, #160e08 100%); }
+  .scene-6 .scene-bg { background: radial-gradient(ellipse 80% 80% at 65% 60%, #1c1510 0%, #271a0f 45%, #150f09 100%); }
+
+  /* Noise texture overlay */
+  .praline-section .scene-bg::after,
+  #opening .bg-image::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+    opacity: .06;
+    pointer-events: none;
+  }
+
+  /* ── Praline Photo ── */
+  .praline-photo {
+    position: absolute;
+    border-radius: 50%;
+    overflow: hidden;
+    will-change: transform;
+  }
+
+  /* Alternating positions */
+  .scene-odd .praline-photo  { left: 5%;  top: 50%; transform: translate(0, -50%); width: clamp(260px,38vw,520px); height: clamp(260px,38vw,520px); }
+  .scene-even .praline-photo { right: 5%; top: 50%; transform: translate(0, -50%); width: clamp(260px,38vw,520px); height: clamp(260px,38vw,520px); }
+
+  .praline-photo img {
+    width: 100%; height: 100%;
+    object-fit: cover;
+    display: block;
+    filter: saturate(.92) contrast(1.05);
+    transition: transform 8s ease;
+  }
+
+  .praline-photo::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    border: 1px solid rgba(184,148,90,0.25);
+    z-index: 2;
+    pointer-events: none;
+  }
+
+  /* Photo glow ring */
+  .praline-photo::after {
+    content: '';
+    position: absolute;
+    inset: -12px;
+    border-radius: 50%;
+    border: 1px solid rgba(184,148,90,0.1);
+    z-index: 1;
+    pointer-events: none;
+  }
+
+  /* ── Text Block ── */
+  .praline-text {
+    position: relative;
+    z-index: 5;
+    max-width: 44vw;
+    will-change: transform, opacity;
+  }
+
+  .scene-odd  .praline-text { margin-right: 6vw; margin-left: auto; padding-left: 4vw; }
+  .scene-even .praline-text { margin-left: 6vw; margin-right: auto; padding-right: 4vw; }
+
+  .praline-number {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(4rem, 10vw, 8rem);
+    font-weight: 300;
+    font-style: italic;
+    color: rgba(184,148,90,0.08);
+    line-height: 1;
+    position: absolute;
+    top: -3rem;
+    right: 0;
+    pointer-events: none;
+    user-select: none;
+  }
+
+  .scene-even .praline-number { right: auto; left: 0; }
+
+  .praline-label {
+    font-family: 'Raleway', sans-serif;
+    font-weight: 200;
+    font-size: clamp(.6rem, 1vw, .75rem);
+    letter-spacing: .5em;
+    color: var(--gold);
+    text-transform: uppercase;
+    margin-bottom: 1.5rem;
+    display: block;
+    overflow: hidden;
+  }
+
+  .praline-label span { display: block; }
+
+  .praline-name {
+    font-family: 'Cormorant Garamond', serif;
+    font-weight: 400;
+    font-size: clamp(2rem, 4.5vw, 4rem);
+    line-height: 1.15;
+    color: var(--cream);
+    margin-bottom: 1.8rem;
+    overflow: hidden;
+  }
+
+  .praline-name span { display: block; }
+
+  .gold-line {
+    width: 60px;
+    height: 1px;
+    background: linear-gradient(to left, var(--gold), transparent);
+    margin-bottom: 1.8rem;
+    transform-origin: right;
+  }
+
+  .scene-even .gold-line { transform-origin: left; background: linear-gradient(to right, var(--gold), transparent); }
+
+  .praline-desc {
+    font-family: 'Raleway', sans-serif;
+    font-weight: 200;
+    font-size: clamp(.8rem, 1.3vw, .95rem);
+    line-height: 1.9;
+    color: rgba(245,237,224,0.7);
+    max-width: 32ch;
+  }
+
+  .praline-tags {
+    display: flex;
+    gap: .8rem;
+    flex-wrap: wrap;
+    margin-top: 2rem;
+  }
+
+  .tag {
+    font-family: 'Raleway', sans-serif;
+    font-weight: 300;
+    font-size: .65rem;
+    letter-spacing: .35em;
+    color: var(--gold);
+    text-transform: uppercase;
+    padding: .35rem .9rem;
+    border: 1px solid rgba(184,148,90,0.25);
+    background: rgba(184,148,90,0.04);
+  }
+
+  /* ── Progress Bar ── */
+  #progress-bar {
+    position: fixed;
+    right: 2.5rem;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 100;
+    display: flex;
+    flex-direction: column;
+    gap: .9rem;
+    align-items: center;
+  }
+
+  .progress-dot {
+    width: 5px; height: 5px;
+    border-radius: 50%;
+    background: rgba(184,148,90,0.25);
+    transition: background .4s ease, transform .4s ease;
+    cursor: pointer;
+  }
+
+  .progress-dot.active {
+    background: var(--gold);
+    transform: scale(1.6);
+  }
+
+  /* ── Navigation Logo ── */
+  #nav {
+    position: fixed;
+    top: 2rem;
+    right: 2.5rem;
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    mix-blend-mode: normal;
+  }
+
+  #nav .brand {
+    font-family: 'Cormorant Garamond', serif;
+    font-weight: 300;
+    font-size: 1rem;
+    letter-spacing: .15em;
+    color: var(--cream);
+    opacity: .7;
+    text-decoration: none;
+  }
+
+  /* ── Transition Overlay ── */
+  #transition-overlay {
+    position: fixed;
+    inset: 0;
+    background: var(--chocolate);
+    z-index: 500;
+    pointer-events: none;
+    transform: scaleY(0);
+    transform-origin: bottom;
+  }
+
+  /* ── Ambient Light per Scene ── */
+  .ambient {
+    position: absolute;
+    border-radius: 50%;
+    pointer-events: none;
+    filter: blur(80px);
+    opacity: .12;
+    will-change: transform;
+  }
+
+  .scene-1 .ambient { width: 50vw; height: 50vh; background: #4a2010; top: 20%; left: -10%; }
+  .scene-2 .ambient { width: 45vw; height: 55vh; background: #5a3015; top: 30%; right: -5%; }
+  .scene-3 .ambient { width: 55vw; height: 45vh; background: #3a2818; top: 25%; left: 5%; }
+  .scene-4 .ambient { width: 48vw; height: 50vh; background: #4d2812; top: 20%; right: 0%; }
+  .scene-5 .ambient { width: 52vw; height: 48vh; background: #3d1e0a; top: 28%; left: 2%; }
+  .scene-6 .ambient { width: 46vw; height: 52vh; background: #4a3020; top: 22%; right: 3%; }
+
+  /* ── Mobile ── */
+  @media (max-width: 768px) {
+    #progress-bar { right: 1rem; }
+    #nav { right: 1rem; top: 1.2rem; }
+
+    .praline-section { align-items: flex-end; padding-bottom: 6vh; }
+
+    .scene-odd .praline-photo,
+    .scene-even .praline-photo {
+      left: 50%; right: auto; top: 6vh;
+      transform: translateX(-50%);
+      width: clamp(200px, 65vw, 320px);
+      height: clamp(200px, 65vw, 320px);
+    }
+
+    .scene-odd .praline-text,
+    .scene-even .praline-text {
+      margin: 0 auto;
+      max-width: 90vw;
+      padding: 0 5vw;
+      text-align: center;
+    }
+
+    .gold-line { margin: 0 auto 1.8rem; }
+    .praline-desc { max-width: 100%; }
+    .praline-tags { justify-content: center; }
+    .praline-number { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<!-- Cursor -->
+<div class="cursor" id="cursor"></div>
+<div class="cursor-ring" id="cursorRing"></div>
+
+<!-- Nav -->
+<nav id="nav">
+  <span class="brand">אדונית השוקולד</span>
+</nav>
+
+<!-- Progress Dots -->
+<div id="progress-bar">
+  <div class="progress-dot active" data-index="0"></div>
+  <div class="progress-dot" data-index="1"></div>
+  <div class="progress-dot" data-index="2"></div>
+  <div class="progress-dot" data-index="3"></div>
+  <div class="progress-dot" data-index="4"></div>
+  <div class="progress-dot" data-index="5"></div>
+  <div class="progress-dot" data-index="6"></div>
+</div>
+
+<!-- Transition overlay -->
+<div id="transition-overlay"></div>
+
+<!-- ═══════════ OPENING SCENE ═══════════ -->
+<section id="opening">
+  <div class="bg-image" id="openingBg"></div>
+  <div class="overlay"></div>
+  <div class="content">
+    <p class="eyebrow" id="openEyebrow">אדונית השוקולד</p>
+    <h1 id="openTitle">הפרלינים<br><em>שלנו</em></h1>
+    <p class="sub" id="openSub">שישה פרלינים. שישה סיפורים.</p>
+  </div>
+  <div class="scroll-hint" id="scrollHint">
+    <span>גללו לגלות</span>
+    <div class="scroll-line"></div>
+  </div>
+</section>
+
+<!-- ═══════════ PRALINE 1 ═══════════ -->
+<section class="praline-section scene-1 scene-odd" data-index="1">
+  <div class="scene-bg"></div>
+  <div class="ambient"></div>
+  <div class="praline-photo">
+    <img src="photos/pic1.jpg" alt="פרלין שוקולד מריר ופסיפלורה">
+  </div>
+  <div class="praline-text">
+    <div class="praline-number">01</div>
+    <span class="praline-label"><span>פרלין ראשון</span></span>
+    <div class="praline-name"><span>שוקולד מריר</span><span>ופסיפלורה</span></div>
+    <div class="gold-line"></div>
+    <p class="praline-desc">
+      שוקולד מריר בעל עומק ועוצמה, נפגש עם חמיצות טרופית בוהקת של פסיפלורה טרייה.
+      ניגוד שמעורר את החושים — מרירות אלגנטית ורעננות פרי בלתי נשכחת.
+    </p>
+    <div class="praline-tags">
+      <span class="tag">מריר 72%</span>
+      <span class="tag">פסיפלורה טרופית</span>
+      <span class="tag">בלגי</span>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════ PRALINE 2 ═══════════ -->
+<section class="praline-section scene-2 scene-even" data-index="2">
+  <div class="scene-bg"></div>
+  <div class="ambient"></div>
+  <div class="praline-photo">
+    <img src="photos/pic2.jpg" alt="פרלין קרמל ומלח ים">
+  </div>
+  <div class="praline-text">
+    <div class="praline-number">02</div>
+    <span class="praline-label"><span>פרלין שני</span></span>
+    <div class="praline-name"><span>קרמל</span><span>ומלח ים</span></div>
+    <div class="gold-line"></div>
+    <p class="praline-desc">
+      קרמל מבושל לאיטו עד לצבע ענבר זהוב, מחופה בשוקולד חלב שמנת.
+      גבישי מלח ים עדינים פורצים ברגע האחרון — תיאטרון טעמים על הלשון.
+    </p>
+    <div class="praline-tags">
+      <span class="tag">קרמל חמאה</span>
+      <span class="tag">מלח ים אטלנטי</span>
+      <span class="tag">חלב 38%</span>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════ PRALINE 3 ═══════════ -->
+<section class="praline-section scene-3 scene-odd" data-index="3">
+  <div class="scene-bg"></div>
+  <div class="ambient"></div>
+  <div class="praline-photo">
+    <img src="photos/pic3.jpg" alt="פרלין פיסטוק ורד">
+  </div>
+  <div class="praline-text">
+    <div class="praline-number">03</div>
+    <span class="praline-label"><span>פרלין שלישי</span></span>
+    <div class="praline-name"><span>פיסטוק</span><span>ורד</span></div>
+    <div class="gold-line"></div>
+    <p class="praline-desc">
+      מחית פיסטוק סיציליאני בעל עושר ירוק ועמוק, עטופה בשוקולד לבן ניחוח ורד מהגן.
+      שילוב שרק אדונית שוקולד אמיתית יודעת לאזן.
+    </p>
+    <div class="praline-tags">
+      <span class="tag">פיסטוק סיציליאני</span>
+      <span class="tag">ורד דמשק</span>
+      <span class="tag">לבן 35%</span>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════ PRALINE 4 ═══════════ -->
+<section class="praline-section scene-4 scene-even" data-index="4">
+  <div class="scene-bg"></div>
+  <div class="ambient"></div>
+  <div class="praline-photo">
+    <img src="photos/pic4.jpg" alt="פרלין נוגט וניל בורבון">
+  </div>
+  <div class="praline-text">
+    <div class="praline-number">04</div>
+    <span class="praline-label"><span>פרלין רביעי</span></span>
+    <div class="praline-name"><span>נוגט</span><span>וניל בורבון</span></div>
+    <div class="gold-line"></div>
+    <p class="praline-desc">
+      נוגט פריזאי אוורירי ועדין, מנוקד בוניל בורבון ממדגסקר — המלכה של התבלינים.
+      מתיקות שמתפתחת ומשתהה, כמו זיכרון ישן וחמים.
+    </p>
+    <div class="praline-tags">
+      <span class="tag">נוגט פריזאי</span>
+      <span class="tag">וניל מדגסקר</span>
+      <span class="tag">חלב 40%</span>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════ PRALINE 5 ═══════════ -->
+<section class="praline-section scene-5 scene-odd" data-index="5">
+  <div class="scene-bg"></div>
+  <div class="ambient"></div>
+  <div class="praline-photo">
+    <img src="photos/pic5.jpg" alt="פרלין שוקולד חלב ועוגת דבש">
+  </div>
+  <div class="praline-text">
+    <div class="praline-number">05</div>
+    <span class="praline-label"><span>פרלין חמישי</span></span>
+    <div class="praline-name"><span>שוקולד חלב</span><span>ועוגת דבש</span></div>
+    <div class="gold-line"></div>
+    <p class="praline-desc">
+      גנאש שוקולד חלב קטיפתי עם שכבת קרמל דבש מדבש הרי הגליל.
+      כל ביס מזכיר ריח של מטבח ישראלי חמים, מוגש בלבוש שוקולד של שלמות.
+    </p>
+    <div class="praline-tags">
+      <span class="tag">דבש גליל</span>
+      <span class="tag">קינמון סיילוני</span>
+      <span class="tag">חלב 36%</span>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════ PRALINE 6 ═══════════ -->
+<section class="praline-section scene-6 scene-even" data-index="6">
+  <div class="scene-bg"></div>
+  <div class="ambient"></div>
+  <div class="praline-photo">
+    <img src="photos/pic6.jpg" alt="פרלין מנטה ושוקולד לבן">
+  </div>
+  <div class="praline-text">
+    <div class="praline-number">06</div>
+    <span class="praline-label"><span>פרלין שישי</span></span>
+    <div class="praline-name"><span>מנטה טרייה</span><span>ושוקולד לבן</span></div>
+    <div class="gold-line"></div>
+    <p class="praline-desc">
+      מנטה מרוקאית עדינה — לא חריפה, אלא נשימה קרירה — משולבת בשוקולד לבן קרמי.
+      פינאלה מרענן שסוגר את החוויה בגינה אחת גדולה, ירוקה ומוארת.
+    </p>
+    <div class="praline-tags">
+      <span class="tag">מנטה מרוקאית</span>
+      <span class="tag">שמן אתרי</span>
+      <span class="tag">לבן 32%</span>
+    </div>
+  </div>
+</section>
+
+<!-- GSAP -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+
+<script>
+gsap.registerPlugin(ScrollTrigger);
+
+/* ── Lenis-style smooth scroll via GSAP ticker ── */
+let scrollY = 0, currentScrollY = 0;
+const lerpFactor = 0.08;
+
+// We'll use native smooth scroll via ScrollTrigger normalizeScroll
+ScrollTrigger.normalizeScroll(true);
+
+/* ── Cursor ── */
+const cursor = document.getElementById('cursor');
+const ring = document.getElementById('cursorRing');
+let mouseX = 0, mouseY = 0, ringX = 0, ringY = 0;
+
+document.addEventListener('mousemove', e => {
+  mouseX = e.clientX; mouseY = e.clientY;
+  gsap.set(cursor, { x: mouseX, y: mouseY });
+});
+
+gsap.ticker.add(() => {
+  ringX += (mouseX - ringX) * 0.12;
+  ringY += (mouseY - ringY) * 0.12;
+  gsap.set(ring, { x: ringX, y: ringY });
+});
+
+document.querySelectorAll('a, .progress-dot, .tag').forEach(el => {
+  el.addEventListener('mouseenter', () => { cursor.classList.add('hover'); ring.classList.add('hover'); });
+  el.addEventListener('mouseleave', () => { cursor.classList.remove('hover'); ring.classList.remove('hover'); });
+});
+
+/* ── Opening Entrance ── */
+const openTl = gsap.timeline({ delay: .3 });
+openTl
+  .to('#openEyebrow', { opacity: 1, y: 0, duration: 1, ease: 'power3.out', from: { y: 20 } })
+  .from('#openTitle', { opacity: 0, y: 40, duration: 1.2, ease: 'power3.out' }, '-=.6')
+  .to('#openTitle', { opacity: 1, duration: 0 }, '<')
+  .from('#openSub', { opacity: 0, y: 20, duration: 1, ease: 'power3.out' }, '-=.7')
+  .to('#openSub', { opacity: 1, duration: 0 }, '<')
+  .to('#scrollHint', { opacity: 1, duration: 1, ease: 'power2.out' }, '-=.3');
+
+/* ── Opening parallax ── */
+gsap.to('#openingBg', {
+  yPercent: 30,
+  ease: 'none',
+  scrollTrigger: {
+    trigger: '#opening',
+    start: 'top top',
+    end: 'bottom top',
+    scrub: true
+  }
+});
+
+/* ── Progress dots ── */
+const dots = document.querySelectorAll('.progress-dot');
+
+function setActiveDot(index) {
+  dots.forEach((d, i) => d.classList.toggle('active', i === index));
+}
+
+ScrollTrigger.create({
+  trigger: '#opening',
+  start: 'top center',
+  end: 'bottom center',
+  onToggle: self => { if (self.isActive) setActiveDot(0); }
+});
+
+/* ── Praline Section Animations ── */
+document.querySelectorAll('.praline-section').forEach((section, i) => {
+  const idx = parseInt(section.dataset.index);
+  const isOdd = section.classList.contains('scene-odd');
+
+  const photo = section.querySelector('.praline-photo');
+  const label = section.querySelector('.praline-label span');
+  const name  = section.querySelectorAll('.praline-name span');
+  const line  = section.querySelector('.gold-line');
+  const desc  = section.querySelector('.praline-desc');
+  const tags  = section.querySelectorAll('.tag');
+
+  // Photo entrance
+  gsap.from(photo, {
+    opacity: 0,
+    x: isOdd ? -80 : 80,
+    scale: .92,
+    duration: 1.4,
+    ease: 'power3.out',
+    scrollTrigger: {
+      trigger: section,
+      start: 'top 75%',
+      toggleActions: 'play none none reverse'
+    }
+  });
+
+  // Subtle photo float
+  gsap.to(photo, {
+    y: -20,
+    ease: 'none',
+    scrollTrigger: {
+      trigger: section,
+      start: 'top bottom',
+      end: 'bottom top',
+      scrub: 1.5
+    }
+  });
+
+  // Label clip reveal
+  gsap.from(label, {
+    yPercent: 110,
+    duration: .8,
+    ease: 'power2.out',
+    scrollTrigger: {
+      trigger: section,
+      start: 'top 70%',
+      toggleActions: 'play none none reverse'
+    }
+  });
+
+  // Name lines stagger
+  gsap.from(name, {
+    yPercent: 105,
+    opacity: 0,
+    stagger: .12,
+    duration: .9,
+    ease: 'power3.out',
+    scrollTrigger: {
+      trigger: section,
+      start: 'top 68%',
+      toggleActions: 'play none none reverse'
+    }
+  });
+
+  // Gold line expand
+  gsap.from(line, {
+    scaleX: 0,
+    duration: 1,
+    ease: 'power2.inOut',
+    scrollTrigger: {
+      trigger: section,
+      start: 'top 65%',
+      toggleActions: 'play none none reverse'
+    }
+  });
+
+  // Desc fade up
+  gsap.from(desc, {
+    opacity: 0,
+    y: 25,
+    duration: 1,
+    ease: 'power2.out',
+    scrollTrigger: {
+      trigger: section,
+      start: 'top 62%',
+      toggleActions: 'play none none reverse'
+    }
+  });
+
+  // Tags stagger
+  gsap.from(tags, {
+    opacity: 0,
+    y: 15,
+    stagger: .1,
+    duration: .7,
+    ease: 'power2.out',
+    scrollTrigger: {
+      trigger: section,
+      start: 'top 60%',
+      toggleActions: 'play none none reverse'
+    }
+  });
+
+  // Ambient light drift
+  gsap.to(section.querySelector('.ambient'), {
+    x: isOdd ? 40 : -40,
+    y: -30,
+    ease: 'none',
+    scrollTrigger: {
+      trigger: section,
+      start: 'top bottom',
+      end: 'bottom top',
+      scrub: 2
+    }
+  });
+
+  // Progress dot
+  ScrollTrigger.create({
+    trigger: section,
+    start: 'top center',
+    end: 'bottom center',
+    onEnter: () => setActiveDot(idx),
+    onEnterBack: () => setActiveDot(idx)
+  });
+});
+
+/* ── Progress dot click navigation ── */
+dots.forEach((dot, i) => {
+  dot.addEventListener('click', () => {
+    const targets = ['#opening', ...Array.from(document.querySelectorAll('.praline-section')).map((_, j) => `.praline-section:nth-of-type(${j+2})`)];
+    if (i === 0) {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    } else {
+      const sections = document.querySelectorAll('.praline-section');
+      sections[i - 1]?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+  });
+});
+
+/* ── Refresh ── */
+ScrollTrigger.refresh();
+</script>
+</body>
+</html>
