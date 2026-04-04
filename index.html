@@ -11,6 +11,8 @@
   <link href="https://fonts.googleapis.com/css2?family=Rubik:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,300;1,400;1,500;1,600;1,700&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400;1,500;1,600&family=Caveat:wght@400;500;600;700&family=Frank+Ruhl+Libre:wght@300;400;500;700;900&family=Gveret+Levin+AlefAlefAlef&display=swap" rel="stylesheet" />
 
   <link rel="stylesheet" href="style.css" />
+  <!-- Lenis smooth scroll -->
+  <script src="https://unpkg.com/@studio-freight/lenis@1.0.42/dist/lenis.min.js"></script>
   <style>
     /* ── BEAMS CANVAS ── */
     #beamsCanvas {
@@ -278,10 +280,10 @@
     .pi-7 { grid-column: 8/10; grid-row: 3/4; aspect-ratio: 4/5; }
     .pi-8 { grid-column: 10/13; grid-row: 3/4; aspect-ratio: 4/3; }
 
-    /* ── 3D MARQUEE REVIEWS ── */
+    /* ── SPLIT TESTIMONIAL ── */
     .reviews-3d-section {
       background: var(--ink);
-      padding: var(--pad-v) var(--pad-h);
+      padding: clamp(5rem,10vw,9rem) var(--pad-h);
       overflow: hidden;
       position: relative;
     }
@@ -291,93 +293,166 @@
       display: flex; align-items: center; justify-content: center;
       font-size: clamp(8rem,20vw,18rem);
       font-family: var(--serif);
-      color: rgba(160,120,64,.03);
+      color: rgba(160,120,64,.025);
       letter-spacing: .3em;
       pointer-events: none;
     }
     .reviews-3d-inner {
       position: relative; z-index: 1;
+      max-width: 1100px;
+      margin: 0 auto;
     }
-    .marquee-3d-stage {
-      perspective: 400px;
-      overflow: hidden;
-      height: 520px;
-      mask-image: linear-gradient(to bottom, transparent 0%, black 15%, black 85%, transparent 100%);
-      -webkit-mask-image: linear-gradient(to bottom, transparent 0%, black 15%, black 85%, transparent 100%);
+    /* Split layout: left = text, right = image */
+    .split-testimonial {
+      display: grid;
+      grid-template-columns: 1fr 300px;
+      gap: 4rem;
+      align-items: center;
+      cursor: pointer;
       position: relative;
     }
-    .marquee-3d-transform {
+    .split-testi-left { position: relative; }
+
+    /* Company tag */
+    .split-testi-tag {
       display: flex;
-      gap: 1.2rem;
-      transform: rotateX(18deg) rotateY(5deg) rotateZ(-6deg);
-      transform-origin: center center;
-      height: 100%;
-      align-items: flex-start;
+      align-items: center;
+      gap: .8rem;
+      font-size: .58rem;
+      letter-spacing: .28em;
+      text-transform: uppercase;
+      color: rgba(196,178,152,.45);
+      font-family: var(--serif);
+      margin-bottom: 2rem;
+      opacity: 0;
+      transform: translateY(8px);
+      transition: opacity .5s ease, transform .5s ease;
     }
-    .marquee-col {
-      display: flex;
-      flex-direction: column;
-      gap: 1rem;
-      flex-shrink: 0;
-      width: 240px;
+    .split-testi-tag.visible { opacity: 1; transform: translateY(0); }
+    .split-testi-tag::before {
+      content: '';
+      display: block;
+      width: 2.5rem;
+      height: 1px;
+      background: rgba(160,120,64,.4);
     }
-    .marquee-col-inner {
-      display: flex;
-      flex-direction: column;
-      gap: 1rem;
-      animation: marqueeUp 30s linear infinite;
-    }
-    .marquee-col:nth-child(2) .marquee-col-inner {
-      animation-direction: reverse;
-      animation-duration: 35s;
-    }
-    .marquee-col:nth-child(3) .marquee-col-inner {
-      animation-duration: 28s;
-    }
-    .marquee-col:nth-child(4) .marquee-col-inner {
-      animation-direction: reverse;
-      animation-duration: 32s;
-    }
-    @keyframes marqueeUp {
-      from { transform: translateY(0); }
-      to   { transform: translateY(-50%); }
-    }
-    .review-mini-card {
-      background: linear-gradient(135deg, rgba(42,26,20,.9), rgba(20,10,6,.95));
-      border: 1px solid rgba(160,120,64,.15);
-      border-radius: 4px;
-      padding: 1.2rem;
-      flex-shrink: 0;
-      backdrop-filter: blur(8px);
-    }
-    .rmc-stars { color: var(--gold); font-size: .7rem; margin-bottom: .6rem; letter-spacing: .1em; }
-    .rmc-text {
-      font-size: .78rem;
-      color: var(--stone);
-      line-height: 1.55;
-      margin-bottom: .8rem;
-      font-family: var(--sans);
-    }
-    .rmc-author {
-      display: flex; align-items: center; gap: .6rem;
-    }
-    .rmc-avatar {
-      width: 30px; height: 30px;
-      border-radius: 50%;
-      object-fit: cover;
-      border: 1px solid rgba(160,120,64,.3);
-    }
-    .rmc-name {
-      font-size: .72rem;
+
+    /* Quote */
+    .split-testi-quote {
+      font-family: var(--serif);
+      font-size: clamp(1.35rem, 3vw, 2.1rem);
+      font-weight: 300;
+      line-height: 1.45;
+      letter-spacing: .01em;
       color: var(--cream);
-      font-family: var(--sans);
-      font-weight: 600;
+      position: relative;
+      overflow: hidden;
+    }
+    .split-testi-quote-inner {
+      display: block;
+      opacity: 0;
+      transform: translateY(32px);
+      transition: opacity .65s cubic-bezier(0.22,1,.36,1),
+                  transform .65s cubic-bezier(0.22,1,.36,1);
+    }
+    .split-testi-quote-inner.visible { opacity: 1; transform: translateY(0); }
+
+    /* Author */
+    .split-testi-author {
+      display: flex;
+      align-items: center;
+      gap: 1.2rem;
+      margin-top: 2.2rem;
+      opacity: 0;
+      transform: translateY(8px);
+      transition: opacity .5s ease .15s, transform .5s ease .15s;
+    }
+    .split-testi-author.visible { opacity: 1; transform: translateY(0); }
+    .split-testi-line {
+      width: 2.5rem; height: 1px;
+      background: rgba(160,120,64,.35);
+    }
+    .split-testi-name {
+      font-size: .72rem;
+      letter-spacing: .12em;
+      color: var(--gold);
+      font-family: var(--serif);
       display: block;
     }
-    .rmc-role {
-      font-size: .62rem;
-      color: rgba(196,178,152,.5);
+    .split-testi-role {
+      font-size: .6rem;
+      letter-spacing: .08em;
+      color: rgba(196,178,152,.42);
+      font-family: var(--sans);
       display: block;
+      margin-top: .15rem;
+    }
+
+    /* Right: image */
+    .split-testi-right {
+      position: relative;
+      height: 360px;
+    }
+    .split-testi-img-wrap {
+      position: absolute; inset: 0;
+      border-radius: 4px;
+      overflow: hidden;
+      border: 1px solid rgba(160,120,64,.12);
+    }
+    .split-testi-img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+    /* Next hint on hover */
+    .split-testi-next-hint {
+      position: absolute;
+      bottom: -3rem;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: .52rem;
+      letter-spacing: .25em;
+      color: rgba(196,178,152,.3);
+      display: flex;
+      align-items: center;
+      gap: .5rem;
+      opacity: 0;
+      transition: opacity .3s ease;
+      pointer-events: none;
+      white-space: nowrap;
+      font-family: var(--serif);
+      text-transform: uppercase;
+    }
+    .split-testimonial:hover .split-testi-next-hint { opacity: 1; }
+
+    /* Dots */
+    .split-testi-dots {
+      display: flex;
+      gap: .7rem;
+      margin-top: 3rem;
+      align-items: center;
+    }
+    .split-testi-dot {
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      background: rgba(196,178,152,.2);
+      cursor: pointer;
+      transition: background .35s ease, transform .35s ease;
+      border: none;
+      padding: 0;
+    }
+    .split-testi-dot.active {
+      background: var(--gold);
+      transform: scale(1.35);
+    }
+
+    @media (max-width: 800px) {
+      .split-testimonial {
+        grid-template-columns: 1fr;
+        gap: 2.5rem;
+      }
+      .split-testi-right { height: 260px; }
     }
 
     /* ── LUXURY ORNAMENTAL DIVIDERS ── */
@@ -435,14 +510,14 @@
     .grad-divider-gem::before { transform: translate(-12px,-50%) rotate(45deg); }
     .grad-divider-gem::after  { transform: translate(8px,-50%) rotate(45deg); }
 
-    /* ── 3D CIRCULAR GALLERY ── */
-    .circ-gallery-section {
+    /* ── ACCORDION GALLERY ── */
+    .gal-section {
       background: var(--choc);
+      padding: clamp(4rem, 8vw, 8rem) var(--pad-h);
       position: relative;
-      z-index: 1;
-      /* NO overflow:hidden — it clips 3D cards */
+      overflow: hidden;
     }
-    .circ-gallery-section::before {
+    .gal-section::before {
       content: 'ATELIER';
       position: absolute; top: 50%; left: 50%;
       transform: translate(-50%,-50%);
@@ -454,128 +529,229 @@
       white-space: nowrap;
       z-index: 0;
     }
-    .circ-gallery-sticky {
-      position: sticky;
-      top: 0;
-      height: 100vh;
-      background: var(--choc);
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      /* NO overflow:hidden — it clips 3D cards */
-    }
-    .circ-gallery-header {
+    .gal-header {
       text-align: center;
+      margin-bottom: clamp(2rem, 5vw, 3.5rem);
       position: relative;
-      z-index: 10;
-      margin-bottom: 0;
+      z-index: 1;
       pointer-events: none;
     }
-    .circ-gallery-header .section-label {
+    .gal-header .section-label {
       justify-content: center;
     }
-    .circ-stage-wrap {
-      width: 100%;
-      flex: 1;
+
+    /* ── 3D CAROUSEL ── */
+    .gal-carousel {
+      position: relative;
+      z-index: 1;
+      height: clamp(380px, 60vw, 560px);
       display: flex;
       align-items: center;
       justify-content: center;
-      position: relative;
-    }
-    /* Perspective lives on this wrapper — NOT on the element with transform-style */
-    .circ-stage {
-      width: 100%;
-      height: 480px;
-      position: relative;
-      perspective: 1200px;
-      perspective-origin: 50% 50%;
-    }
-    /* Rotor is the 3D space — it must NOT have overflow:hidden or filter */
-    .circ-rotor {
-      position: absolute;
-      inset: 0;
-      transform-style: preserve-3d;
-      will-change: transform;
-    }
-    /* Cards: no overflow:hidden (breaks 3D), no transform-style needed */
-    .circ-card {
-      position: absolute;
-      width: 240px;
-      height: 340px;
-      left: 50%;
-      top: 50%;
-      margin-left: -120px;
-      margin-top: -170px;
-      border-radius: 3px;
-      cursor: pointer;
-      backface-visibility: hidden;
-      /* box-shadow only, transitions only on box-shadow */
-      box-shadow: 0 8px 40px rgba(0,0,0,.5);
-      transition: box-shadow .4s ease;
-    }
-    .circ-card.front {
-      box-shadow: 0 16px 60px rgba(0,0,0,.75), 0 0 30px rgba(160,120,64,.15);
-    }
-    /* Inner wrapper handles overflow:hidden safely (it's a flat 2D child) */
-    .circ-card-inner {
-      position: absolute;
-      inset: 0;
-      border-radius: 3px;
       overflow: hidden;
     }
-    .circ-card img {
+    .gal-carousel-track {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      perspective: 1100px;
+    }
+    .gal-car-item {
+      position: absolute;
+      width: clamp(180px, 22vw, 280px);
+      height: clamp(280px, 44vw, 440px);
+      border-radius: 4px;
+      overflow: hidden;
+      cursor: pointer;
+      transition: transform 0.55s cubic-bezier(0.76,0,0.24,1),
+                  opacity 0.55s ease,
+                  filter 0.55s ease,
+                  box-shadow 0.55s ease;
+      will-change: transform, opacity, filter;
+    }
+    .gal-car-item img {
       width: 100%; height: 100%;
       object-fit: cover;
       display: block;
-      transition: transform .7s cubic-bezier(0.76,0,0.24,1);
+      transition: transform 0.8s cubic-bezier(0.76,0,0.24,1);
     }
-    .circ-card:hover img,
-    .circ-card.front img { transform: scale(1.06); }
-    .circ-card-overlay {
+    .gal-car-item.is-center:hover img { transform: scale(1.04); }
+    .gal-car-item.is-center {
+      box-shadow: 0 32px 90px rgba(0,0,0,.6), 0 0 0 1px rgba(160,120,64,.18);
+    }
+    .gal-car-item::after {
+      content: '';
       position: absolute; inset: 0;
-      background: linear-gradient(to top, rgba(10,4,2,.88) 0%, rgba(10,4,2,.2) 45%, transparent 70%);
+      background: linear-gradient(to top, rgba(10,4,2,.7) 0%, rgba(10,4,2,.05) 50%, transparent 75%);
       opacity: 0;
-      transition: opacity .45s ease;
+      transition: opacity 0.45s ease;
     }
-    .circ-card.front .circ-card-overlay,
-    .circ-card:hover .circ-card-overlay { opacity: 1; }
-    .circ-card-label {
+    .gal-car-item.is-center::after { opacity: 1; }
+
+    /* Label on center image */
+    .gal-car-label {
       position: absolute; bottom: 0; left: 0; right: 0;
-      padding: 1.4rem 1.1rem;
+      padding: 1.4rem 1.2rem 1rem;
+      z-index: 3;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
       transform: translateY(8px);
       opacity: 0;
-      transition: transform .45s ease, opacity .45s ease;
-      z-index: 2;
+      transition: transform 0.5s cubic-bezier(0.76,0,0.24,1),
+                  opacity 0.5s ease 0.1s;
     }
-    .circ-card.front .circ-card-label,
-    .circ-card:hover .circ-card-label {
-      transform: translateY(0);
-      opacity: 1;
+    .gal-car-item.is-center .gal-car-label { transform: translateY(0); opacity: 1; }
+    .gal-car-name {
+      font-family: var(--serif);
+      font-size: .55rem;
+      letter-spacing: .28em;
+      color: var(--gold);
+      text-transform: uppercase;
+      white-space: nowrap;
     }
-    .circ-card-label span {
-      font-size: .62rem;
-      letter-spacing: .22em;
+    .gal-car-num {
+      font-family: var(--serif);
+      font-size: .48rem;
+      letter-spacing: .4em;
+      color: rgba(196,178,152,.3);
+    }
+
+    /* Nav buttons */
+    .gal-car-btn {
+      position: absolute;
+      top: 50%; transform: translateY(-50%);
+      z-index: 10;
+      background: rgba(26,12,8,.55);
+      border: 1px solid rgba(160,120,64,.22);
+      color: rgba(196,178,152,.55);
+      width: 44px; height: 44px;
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer;
+      font-size: 1.1rem;
+      backdrop-filter: blur(6px);
+      transition: color .3s ease, border-color .3s ease, background .3s ease,
+                  transform .3s ease;
+    }
+    .gal-car-prev { left: clamp(6px, 3vw, 28px); }
+    .gal-car-next { right: clamp(6px, 3vw, 28px); }
+    .gal-car-btn:hover {
+      color: var(--gold);
+      border-color: rgba(160,120,64,.55);
+      background: rgba(26,12,8,.8);
+    }
+    .gal-car-prev:hover { transform: translateY(-50%) translateX(-3px); }
+    .gal-car-next:hover { transform: translateY(-50%) translateX(3px); }
+
+    /* Dot indicators */
+    .gal-car-dots {
+      position: absolute;
+      bottom: -2.2rem;
+      left: 50%; transform: translateX(-50%);
+      display: flex; gap: .55rem;
+      z-index: 5;
+    }
+    .gal-car-dot {
+      width: 5px; height: 5px;
+      border-radius: 50%;
+      background: rgba(196,178,152,.2);
+      border: none; cursor: pointer;
+      padding: 0;
+      transition: background .35s ease, transform .35s ease;
+    }
+    .gal-car-dot.active {
+      background: var(--gold);
+      transform: scale(1.4);
+    }
+
+    @media (max-width: 600px) {
+      .gal-carousel { height: clamp(300px, 90vw, 400px); }
+      .gal-car-item {
+        width: clamp(140px, 48vw, 200px);
+        height: clamp(220px, 74vw, 320px);
+      }
+    }
+
+    /* Lightbox */
+    .gal-lightbox {
+      position: fixed; inset: 0;
+      z-index: 9000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity .4s ease;
+    }
+    .gal-lightbox.open { opacity: 1; pointer-events: all; }
+    .gal-lb-backdrop {
+      position: absolute; inset: 0;
+      background: rgba(8,3,1,.94);
+      backdrop-filter: blur(12px);
+    }
+    .gal-lb-content {
+      position: relative; z-index: 1;
+      max-width: min(92vw, 880px);
+      max-height: 92vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      transform: scale(0.88) translateY(20px);
+      transition: transform .6s cubic-bezier(0.34,1.56,0.64,1),
+                  opacity .4s ease;
+      opacity: 0;
+    }
+    .gal-lightbox.open .gal-lb-content { transform: scale(1) translateY(0); opacity: 1; }
+    .gal-lb-img {
+      max-width: 100%;
+      max-height: 82vh;
+      object-fit: contain;
+      display: block;
+      border-radius: 2px;
+      box-shadow: 0 40px 120px rgba(0,0,0,.7);
+    }
+    .gal-lb-caption {
+      margin-top: 1.1rem;
+      font-size: .58rem;
+      letter-spacing: .3em;
       color: var(--gold);
       font-family: var(--serif);
       text-transform: uppercase;
     }
-    .circ-gallery-hint {
-      text-align: center;
-      padding: 1.2rem;
-      position: relative;
-      z-index: 10;
+    .gal-lb-close {
+      position: absolute; top: -3rem; right: 0;
+      background: none; border: none;
+      color: rgba(196,178,152,.45);
+      font-size: 1.2rem;
+      cursor: pointer;
+      transition: color .2s ease;
+      padding: .5rem;
     }
-    .circ-gallery-hint p {
-      font-size: .6rem;
-      letter-spacing: .25em;
+    .gal-lb-close:hover { color: var(--gold); }
+
+    /* Nav arrows */
+    .gal-lb-prev, .gal-lb-next {
+      position: fixed;
+      top: 50%; transform: translateY(-50%);
+      background: none; border: none;
       color: rgba(196,178,152,.35);
-      font-family: var(--serif);
-      text-transform: uppercase;
+      font-size: 2rem;
+      cursor: pointer;
+      z-index: 9001;
+      padding: 1rem;
+      transition: color .3s ease, transform .3s ease;
     }
-    @media (max-width: 768px) {
-      .circ-stage { height: 340px; }
-      .circ-card  { width: 170px; height: 240px; margin-left: -85px; margin-top: -120px; }
+    .gal-lb-prev { left: 2rem; }
+    .gal-lb-next { right: 2rem; }
+    .gal-lb-prev:hover { color: var(--gold); transform: translateY(-50%) translateX(-4px); }
+    .gal-lb-next:hover { color: var(--gold); transform: translateY(-50%) translateX(4px); }
+    @media (max-width: 700px) {
+      .gal-lb-prev { left: .5rem; }
+      .gal-lb-next { right: .5rem; }
     }
 
     /* ── ENHANCED CRAFT CARDS ── */
@@ -764,61 +940,6 @@
       }
     }
 
-    /* ── CAROUSEL CARDS — DECORATED ── */
-    .circ-card {
-      border: 1px solid rgba(160,120,64,.22) !important;
-      box-shadow: 0 4px 24px rgba(0,0,0,.45),
-                  0 0 0 1px rgba(160,120,64,.08),
-                  0 0 18px rgba(160,120,64,.12) !important;
-    }
-    .circ-card.front {
-      border-color: rgba(160,120,64,.55) !important;
-      box-shadow: 0 16px 60px rgba(0,0,0,.75),
-                  0 0 0 1px rgba(160,120,64,.25),
-                  0 0 40px rgba(160,120,64,.28),
-                  inset 0 1px 0 rgba(160,120,64,.15) !important;
-    }
-    /* gold corner ornaments on cards */
-    .circ-card-corner {
-      position: absolute;
-      width: 16px; height: 16px;
-      z-index: 3;
-      pointer-events: none;
-    }
-    .circ-card-corner--tl { top: 8px; left: 8px;
-      border-top: 1px solid rgba(160,120,64,.7); border-left: 1px solid rgba(160,120,64,.7); }
-    .circ-card-corner--tr { top: 8px; right: 8px;
-      border-top: 1px solid rgba(160,120,64,.7); border-right: 1px solid rgba(160,120,64,.7); }
-    .circ-card-corner--bl { bottom: 8px; left: 8px;
-      border-bottom: 1px solid rgba(160,120,64,.7); border-left: 1px solid rgba(160,120,64,.7); }
-    .circ-card-corner--br { bottom: 8px; right: 8px;
-      border-bottom: 1px solid rgba(160,120,64,.7); border-right: 1px solid rgba(160,120,64,.7); }
-    /* decorative top bar */
-    .circ-card-deco-bar {
-      position: absolute; top: 0; left: 50%; transform: translateX(-50%);
-      width: 40px; height: 1px;
-      background: linear-gradient(to right, transparent, rgba(160,120,64,.8), transparent);
-      z-index: 3;
-      pointer-events: none;
-    }
-    /* Shimmer on front card */
-    .circ-card.front .circ-card-inner::after {
-      content: '';
-      position: absolute; inset: 0;
-      background: linear-gradient(135deg, rgba(255,255,255,.04) 0%, transparent 50%);
-      z-index: 2;
-      pointer-events: none;
-    }
-    /* card number badge */
-    .circ-card-badge {
-      position: absolute; top: 18px; right: 14px;
-      font-family: var(--serif);
-      font-size: .5rem;
-      letter-spacing: .25em;
-      color: rgba(160,120,64,.7);
-      z-index: 4;
-      pointer-events: none;
-    }
 
     /* ── 3D FLOATING CHOCOLATE BOX ── */
     .hero-3d-box-wrap {
@@ -1314,13 +1435,13 @@
         gap: 0 !important;
       }
       .htv2-brand {
-        font-size: clamp(3.4rem, 13vw, 5rem) !important;
-        line-height: 0.95 !important;
+        font-size: clamp(4.2rem, 16vw, 6.5rem) !important;
+        line-height: 0.93 !important;
         text-align: center !important;
         display: block !important;
       }
       .htv2-brand--sub {
-        font-size: clamp(2.6rem, 10vw, 3.8rem) !important;
+        font-size: clamp(3.2rem, 13vw, 5rem) !important;
         line-height: 1.0 !important;
         letter-spacing: 0.05em !important;
         text-align: center !important;
@@ -1359,6 +1480,24 @@
         text-align: center !important;
         width: 100% !important;
         box-sizing: border-box !important;
+      }
+      /* Mobile outline button — premium glow treatment */
+      .hero-actions-v2 .btn-choc-outline,
+      .hero-mobile-actions .btn-choc-outline {
+        border-color: rgba(201,169,110,.45) !important;
+        box-shadow:
+          0 0 0 1px rgba(201,169,110,.12),
+          0 0 18px rgba(160,100,30,.18),
+          inset 0 0 12px rgba(201,169,110,.04) !important;
+        background: linear-gradient(135deg,
+          rgba(160,120,64,.07) 0%,
+          rgba(201,169,110,.03) 50%,
+          rgba(160,120,64,.07) 100%) !important;
+        animation: outlineGlowPulse 3s ease-in-out infinite !important;
+      }
+      @keyframes outlineGlowPulse {
+        0%, 100% { box-shadow: 0 0 0 1px rgba(201,169,110,.12), 0 0 18px rgba(160,100,30,.18), inset 0 0 12px rgba(201,169,110,.04); }
+        50%       { box-shadow: 0 0 0 1px rgba(201,169,110,.22), 0 0 28px rgba(160,100,30,.28), inset 0 0 18px rgba(201,169,110,.08); }
       }
       .hero-gooey-btn-wrap {
         filter: none !important;
@@ -1422,7 +1561,165 @@
       z-index: 0;
     }
 
+    /* ── TESTIMONIALS COLUMNS ── */
+    .tc-section {
+      background: var(--choc);
+      padding: clamp(5rem,10vw,9rem) 0;
+      overflow: hidden;
+      position: relative;
+    }
+    .tc-section::before {
+      content: 'AMORE';
+      position: absolute; top: 50%; left: 50%;
+      transform: translate(-50%,-50%);
+      font-size: clamp(6rem,16vw,14rem);
+      font-family: var(--serif);
+      letter-spacing: .3em;
+      color: rgba(160,120,64,.03);
+      pointer-events: none; white-space: nowrap;
+      z-index: 0;
+    }
+    .tc-inner {
+      position: relative; z-index: 1;
+    }
+    .tc-header {
+      text-align: center;
+      margin-bottom: clamp(2.5rem, 5vw, 4rem);
+      padding: 0 var(--pad-h);
+    }
+    .tc-columns-wrap {
+      display: flex;
+      gap: 1.2rem;
+      justify-content: center;
+      padding: 0 var(--pad-h);
+      max-height: 680px;
+      overflow: hidden;
+      -webkit-mask-image: linear-gradient(to bottom, transparent, black 18%, black 82%, transparent);
+      mask-image: linear-gradient(to bottom, transparent, black 18%, black 82%, transparent);
+    }
+    .tc-col {
+      flex: 1;
+      min-width: 0;
+      overflow: hidden;
+    }
+    .tc-col--2 { display: none; }
+    .tc-col--3 { display: none; }
+    .tc-track {
+      display: flex;
+      flex-direction: column;
+      gap: 1.2rem;
+      animation: tcScroll linear infinite;
+    }
+    .tc-col--1 .tc-track { animation-duration: 28s; }
+    .tc-col--2 .tc-track { animation-duration: 34s; animation-direction: normal; }
+    .tc-col--3 .tc-track { animation-duration: 24s; }
+    .tc-track:hover { animation-play-state: paused; }
+    @keyframes tcScroll {
+      0%   { transform: translateY(0); }
+      100% { transform: translateY(-50%); }
+    }
+    .tc-card {
+      background: rgba(255,255,255,.025);
+      border: 1px solid rgba(160,120,64,.14);
+      border-radius: 16px;
+      padding: 1.8rem 1.6rem;
+      position: relative;
+      overflow: hidden;
+      transition: border-color .4s ease, background .4s ease, transform .4s cubic-bezier(0.22,1,.36,1);
+      cursor: default;
+      direction: rtl;
+    }
+    .tc-card::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(ellipse at 20% 20%, rgba(160,120,64,.07), transparent 65%);
+      opacity: 0;
+      transition: opacity .4s ease;
+    }
+    .tc-card:hover {
+      border-color: rgba(160,120,64,.38);
+      background: rgba(255,255,255,.045);
+      transform: translateY(-3px);
+    }
+    .tc-card:hover::before { opacity: 1; }
+    .tc-card-quote {
+      font-family: var(--serif);
+      font-size: clamp(.85rem, 1.5vw, .95rem);
+      font-weight: 300;
+      line-height: 1.65;
+      color: rgba(240,230,208,.85);
+      margin-bottom: 1.4rem;
+    }
+    .tc-card-quote::before {
+      content: '"';
+      font-size: 2.2rem;
+      line-height: .6;
+      color: rgba(160,120,64,.4);
+      font-family: var(--serif);
+      display: block;
+      margin-bottom: .6rem;
+    }
+    .tc-card-author {
+      display: flex;
+      align-items: center;
+      gap: .9rem;
+    }
+    .tc-card-avatar {
+      width: 40px; height: 40px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 1.5px solid rgba(160,120,64,.3);
+      flex-shrink: 0;
+    }
+    .tc-card-name {
+      font-family: var(--serif);
+      font-size: .72rem;
+      letter-spacing: .1em;
+      color: var(--gold);
+      display: block;
+    }
+    .tc-card-role {
+      font-family: var(--sans);
+      font-size: .6rem;
+      letter-spacing: .06em;
+      color: rgba(196,178,152,.45);
+      display: block;
+      margin-top: .15rem;
+    }
+    .tc-stars {
+      display: flex;
+      gap: .2rem;
+      margin-bottom: 1rem;
+      flex-direction: row-reverse;
+      justify-content: flex-end;
+    }
+    .tc-star {
+      width: 12px; height: 12px;
+      color: var(--gold);
+      opacity: .85;
+      font-size: .7rem;
+    }
+
     /* ── MOBILE ── */
+    @media (min-width: 640px) {
+      .tc-col--2 { display: block; }
+    }
+    @media (min-width: 1024px) {
+      .tc-col--3 { display: block; }
+    }
+    @media (max-width: 639px) {
+      .tc-columns-wrap {
+        max-height: 560px;
+        padding: 0 1.2rem;
+      }
+      .tc-card { padding: 1.4rem 1.2rem; }
+      .tc-card-quote { font-size: .82rem; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .tc-track { animation: none; }
+    }
+
     @media (max-width: 768px) {
       .selector-options {
         flex-direction: column;
@@ -1858,8 +2155,8 @@
     /* Inner slides up/down */
     .ps-slot-inner {
       display: block;
-      transition: transform 0.72s cubic-bezier(0.16, 1, 0.3, 1),
-                  opacity  0.55s ease;
+      transition: transform 1.1s cubic-bezier(0.16, 1, 0.3, 1),
+                  opacity  0.82s ease;
     }
     .ps-slot-inner.ps-exit {
       transform: translateY(-115%);
@@ -2302,7 +2599,7 @@
         activeImg.style.opacity = '0';
         idleImg.style.opacity   = '1';
         const tmp = activeImg; activeImg = idleImg; idleImg = tmp;
-        setTimeout(() => { abLocked = false; }, 900);
+        setTimeout(() => { abLocked = false; }, 1400);
       };
       if (idleImg.complete && idleImg.naturalWidth > 0) {
         doSwap();
@@ -2336,9 +2633,9 @@
           setTimeout(() => {
             el.classList.remove('ps-enter');
             el.classList.add('ps-show');
-          }, i * 55);
+          }, i * 115);
         });
-      }, 320);
+      }, 520);
     }
 
     /* ── Smooth-step ─────────────────────────────────────────────────── */
@@ -2354,10 +2651,10 @@
     const ZONE        = OUTRO_START - INTRO_END;
 
     // Within each praline's local phase (0→1):
-    const L_IN   = 0.20;   // image fades in by here
-    const L_TON  = 0.28;   // text starts appearing
-    const L_TOFF = 0.78;   // text starts disappearing
-    const L_OUT  = 0.88;   // image fully faded before next
+    const L_IN   = 0.15;   // image fades in by here
+    const L_TON  = 0.20;   // text starts appearing
+    const L_TOFF = 0.82;   // text starts disappearing
+    const L_OUT  = 0.92;   // image fully faded before next
 
     /* ── State ───────────────────────────────────────────────────────── */
     let curIdx = -1, hintHidden = false, rafId = null, lastP = -1;
@@ -2425,7 +2722,7 @@
         glowEl.style.transform = `translate(-50%, -15%) scale(${0.7 + pa * 0.5})`;
 
         // Text panel opacity
-        const ta = ss(L_TON, L_TON + 0.1, loc) * (1 - ss(L_TOFF, L_TOFF + 0.08, loc));
+        const ta = ss(L_TON, L_TON + 0.18, loc) * (1 - ss(L_TOFF, L_TOFF + 0.14, loc));
         textPanel.style.opacity = ta;
 
         // Eyebrow opacity
@@ -2508,7 +2805,7 @@
     <div class="section-gradient-overlay"></div>
     <div class="story-watermark" aria-hidden="true">CHOCOLAT</div>
     <div class="story-inner">
-      <div class="story-visual">
+      <div class="story-visual" data-lux-reveal="up">
         <div class="story-logo-frame">
           <img src="photos/new-logo.jpg" alt="לוגו אדונית השוקולד" class="story-logo-img" />
         </div>
@@ -2520,11 +2817,11 @@
       </div>
 
       <div class="story-text">
-        <span class="section-label section-label--warm">— הסיפור שלנו</span>
-        <h2 class="story-headline">כשאמנות<br/><em>פוגשת טעם</em></h2>
-        <div class="story-rule"></div>
-        <p class="story-body">כל שוקולד שיוצא מהמטבח שלנו הוא פרי מחשבה, דיוק ותשוקה. אנחנו מאמינים שאוכל יכול להיות חוויה אסתטית מלאה — שמגרה את כל החושים.</p>
-        <p class="story-body">אנחנו בוחרים רק את מיטב הקקאו, עובדים עם מרכיבים טבעיים ויוצרים כל פרלינה ביד אחת, עם אהבה ודיוק של אמן.</p>
+        <span class="section-label section-label--warm" data-lux-reveal="up">— הסיפור שלנו</span>
+        <h2 class="story-headline" data-lux-reveal="up" style="--reveal-delay:.1s">כשאמנות<br/><em>פוגשת טעם</em></h2>
+        <div class="story-rule" data-lux-reveal="scale" style="--reveal-delay:.2s"></div>
+        <p class="story-body" data-lux-reveal="up" style="--reveal-delay:.28s">כל שוקולד שיוצא מהמטבח שלנו הוא פרי מחשבה, דיוק ותשוקה. אנחנו מאמינים שאוכל יכול להיות חוויה אסתטית מלאה — שמגרה את כל החושים.</p>
+        <p class="story-body" data-lux-reveal="up" style="--reveal-delay:.38s">אנחנו בוחרים רק את מיטב הקקאו, עובדים עם מרכיבים טבעיים ויוצרים כל פרלינה ביד אחת, עם אהבה ודיוק של אמן.</p>
       </div>
     </div>
 
@@ -2547,8 +2844,8 @@
   <!-- ── STEPS ACCORDION ── -->
   <section class="steps-section" id="steps">
     <div class="steps-header">
-      <span class="section-label" style="color:var(--gold);justify-content:center">— תהליך היצירה</span>
-      <h2 class="section-title">ארבעה שלבים<br/><em>של אמנות</em></h2>
+      <span class="section-label" style="color:var(--gold);justify-content:center" data-lux-reveal="fade">— תהליך היצירה</span>
+      <h2 class="section-title" data-lux-reveal="up" style="--reveal-delay:.12s">ארבעה שלבים<br/><em>של אמנות</em></h2>
     </div>
     <div class="steps-row" id="stepsRow">
 
@@ -2637,34 +2934,93 @@
 
   <!-- ── EXPERIENCE ── -->
   <section id="experience">
+    <div class="exp-ghost-word" aria-hidden="true">MAISON</div>
+
     <div class="exp-inner">
       <div class="exp-visual">
-        <div class="exp-img-wrap" style="overflow:hidden;border-radius:2px;">
-          <img src="video/pic-for-video.png" alt="חוויית אדונית השוקולד" class="exp-real-img" />
+        <div class="exp-visual-num" aria-hidden="true">— 01</div>
+
+        <div class="exp-img-frame">
+          <div class="exp-corner exp-corner--tl" aria-hidden="true"></div>
+          <div class="exp-corner exp-corner--br" aria-hidden="true"></div>
+          <div class="exp-img-wrap exp-img-reveal" style="border-radius:2px;">
+            <img src="video/pic-for-video.png" alt="חוויית אדונית השוקולד" class="exp-real-img" />
+          </div>
         </div>
-        <div class="exp-badge">
-          <span>Premium</span>
-          <span>Handcrafted</span>
+
+        <!-- Circular rotating badge -->
+        <div class="exp-ring-badge" aria-hidden="true">
+          <svg class="exp-ring-svg" viewBox="0 0 120 120">
+            <circle cx="60" cy="60" r="54" fill="none" stroke="rgba(201,168,110,0.2)" stroke-width="0.8"/>
+            <path id="exp-ring-text-path" fill="none" d="M60,6 a54,54 0 1,1 -0.1,0"/>
+            <text class="exp-ring-text">
+              <textPath href="#exp-ring-text-path" startOffset="0%">PREMIUM · HANDCRAFTED · ARTISAN · CHOCOLAT · </textPath>
+            </text>
+          </svg>
+          <div class="exp-ring-center">◆</div>
         </div>
       </div>
 
       <div class="exp-content">
-        <span class="section-label" style="color:var(--gold)">— החוויה שלנו</span>
-        <h2 class="exp-title">יותר מסתם<br/><em>שוקולד</em></h2>
-        <blockquote class="exp-quote">
+        <span class="section-label exp-reveal-item" style="color:var(--gold)">— החוויה שלנו</span>
+        <h2 class="exp-title exp-reveal-item">יותר מסתם<br/><em>שוקולד</em></h2>
+        <div class="exp-rule" aria-hidden="true"></div>
+        <blockquote class="exp-quote exp-reveal-item">
           "שוקולד הוא לא רק ממתק —<br/>הוא רגש בצורת מוצק."
           <cite>— אדונית השוקולד</cite>
         </blockquote>
-        <p class="exp-text">כשאתה נושם את הארומה, מרגיש את הפריכות הראשונה, וטועם את המרקם המשיי שנמס לאט — זה הרגע שאנחנו חיים בשבילו.</p>
+        <p class="exp-text exp-reveal-item">כשאתה נושם את הארומה, מרגיש את הפריכות הראשונה, וטועם את המרקם המשיי שנמס לאט — זה הרגע שאנחנו חיים בשבילו.</p>
         <ul class="exp-list">
-          <li><span class="el-mark">◆</span>שוקולד בלגי ממיטב הפולים בעולם</li>
-          <li><span class="el-mark">◆</span>ללא חומרים משמרים, טבעי לחלוטין</li>
-          <li><span class="el-mark">◆</span>עיצוב אישי לאירועים ומתנות</li>
-          <li><span class="el-mark">◆</span>משלוחים מקוררים לכל הארץ</li>
+          <li class="exp-list-item"><span class="el-mark">◆</span>שוקולד בלגי ממיטב הפולים בעולם</li>
+          <li class="exp-list-item"><span class="el-mark">◆</span>ללא חומרים משמרים, טבעי לחלוטין</li>
+          <li class="exp-list-item"><span class="el-mark">◆</span>עיצוב אישי לאירועים ומתנות</li>
+          <li class="exp-list-item"><span class="el-mark">◆</span>משלוחים מקוררים לכל הארץ</li>
         </ul>
       </div>
     </div>
   </section>
+
+  <script>
+  (function() {
+    var imgWrap    = document.querySelector('.exp-img-reveal');
+    var expRule    = document.querySelector('.exp-rule');
+    var revItems   = document.querySelectorAll('.exp-reveal-item');
+    var listItems  = document.querySelectorAll('.exp-list-item');
+
+    function makeObs(delay, cls) {
+      var obs = new IntersectionObserver(function(entries) {
+        entries.forEach(function(e) {
+          if (!e.isIntersecting) return;
+          setTimeout(function() { e.target.classList.add(cls || 'exp-revealed'); }, delay || 0);
+          obs.unobserve(e.target);
+        });
+      }, { threshold: 0.12 });
+      return obs;
+    }
+
+    if (imgWrap) makeObs(0).observe(imgWrap);
+    if (expRule) makeObs(320).observe(expRule);
+
+    revItems.forEach(function(el, i) {
+      makeObs(i * 130).observe(el);
+    });
+
+    listItems.forEach(function(el, i) {
+      makeObs(i * 115).observe(el);
+    });
+
+    // Scroll parallax on image
+    var expSection = document.getElementById('experience');
+    var expImg = expSection ? expSection.querySelector('.exp-real-img') : null;
+    if (expSection && expImg) {
+      window.addEventListener('scroll', function() {
+        var rect = expSection.getBoundingClientRect();
+        var progress = (window.innerHeight - rect.top) / (window.innerHeight + rect.height);
+        expImg.style.transform = 'translateY(' + ((progress - 0.5) * -28) + 'px)';
+      }, { passive: true });
+    }
+  })();
+  </script>
 
   <!-- Wave: cream → choc -->
   <div class="wave-sep wave-sep--gallery-top">
@@ -2674,100 +3030,60 @@
     </svg>
   </div>
 
-  <!-- ── 3D CIRCULAR GALLERY ── -->
-  <section class="circ-gallery-section" id="gallery" style="height:130vh;">
-    <div class="circ-gallery-sticky">
-      <div class="circ-gallery-header" style="padding:2rem var(--pad-h) 0;">
-        <span class="section-label" style="color:var(--gold)">— האטלייה</span>
-        <h2 class="section-title" style="margin-bottom:0;">יצירות<br/><em>בעבודת יד</em></h2>
-      </div>
-      <div class="circ-stage-wrap">
-        <div class="circ-stage" id="circStage">
-          <div class="circ-rotor" id="circRotor">
-            <div class="circ-card" data-label="פרלינות בוטיק">
-              <div class="circ-card-corner circ-card-corner--tl"></div>
-              <div class="circ-card-corner circ-card-corner--tr"></div>
-              <div class="circ-card-corner circ-card-corner--bl"></div>
-              <div class="circ-card-corner circ-card-corner--br"></div>
-              <div class="circ-card-deco-bar"></div>
-              <span class="circ-card-badge">01</span>
-              <div class="circ-card-inner">
-                <img src="photos/photo-2026-03-30-13-43-24_1.jpg" alt="יצירה 1" loading="lazy" />
-                <div class="circ-card-overlay"></div>
-                <div class="circ-card-label"><span>פרלינות בוטיק</span></div>
-              </div>
-            </div>
-            <div class="circ-card" data-label="לוחות אמנות">
-              <div class="circ-card-corner circ-card-corner--tl"></div>
-              <div class="circ-card-corner circ-card-corner--tr"></div>
-              <div class="circ-card-corner circ-card-corner--bl"></div>
-              <div class="circ-card-corner circ-card-corner--br"></div>
-              <div class="circ-card-deco-bar"></div>
-              <span class="circ-card-badge">02</span>
-              <div class="circ-card-inner">
-                <img src="photos/pic2.jpg" alt="יצירה 2" loading="lazy" />
-                <div class="circ-card-overlay"></div>
-                <div class="circ-card-label"><span>לוחות אמנות</span></div>
-              </div>
-            </div>
-            <div class="circ-card" data-label="מארזי מתנה">
-              <div class="circ-card-corner circ-card-corner--tl"></div>
-              <div class="circ-card-corner circ-card-corner--tr"></div>
-              <div class="circ-card-corner circ-card-corner--bl"></div>
-              <div class="circ-card-corner circ-card-corner--br"></div>
-              <div class="circ-card-deco-bar"></div>
-              <span class="circ-card-badge">03</span>
-              <div class="circ-card-inner">
-                <img src="photos/pic3.jpg" alt="יצירה 3" loading="lazy" />
-                <div class="circ-card-overlay"></div>
-                <div class="circ-card-label"><span>מארזי מתנה</span></div>
-              </div>
-            </div>
-            <div class="circ-card" data-label="שוקולד חי">
-              <div class="circ-card-corner circ-card-corner--tl"></div>
-              <div class="circ-card-corner circ-card-corner--tr"></div>
-              <div class="circ-card-corner circ-card-corner--bl"></div>
-              <div class="circ-card-corner circ-card-corner--br"></div>
-              <div class="circ-card-deco-bar"></div>
-              <span class="circ-card-badge">04</span>
-              <div class="circ-card-inner">
-                <img src="photos/pic4.jpg" alt="יצירה 4" loading="lazy" />
-                <div class="circ-card-overlay"></div>
-                <div class="circ-card-label"><span>שוקולד חי</span></div>
-              </div>
-            </div>
-            <div class="circ-card" data-label="סדנאות יצירה">
-              <div class="circ-card-corner circ-card-corner--tl"></div>
-              <div class="circ-card-corner circ-card-corner--tr"></div>
-              <div class="circ-card-corner circ-card-corner--bl"></div>
-              <div class="circ-card-corner circ-card-corner--br"></div>
-              <div class="circ-card-deco-bar"></div>
-              <span class="circ-card-badge">05</span>
-              <div class="circ-card-inner">
-                <img src="photos/pic5.jpg" alt="יצירה 5" loading="lazy" />
-                <div class="circ-card-overlay"></div>
-                <div class="circ-card-label"><span>סדנאות יצירה</span></div>
-              </div>
-            </div>
-            <div class="circ-card" data-label="טעמים עונתיים">
-              <div class="circ-card-corner circ-card-corner--tl"></div>
-              <div class="circ-card-corner circ-card-corner--tr"></div>
-              <div class="circ-card-corner circ-card-corner--bl"></div>
-              <div class="circ-card-corner circ-card-corner--br"></div>
-              <div class="circ-card-deco-bar"></div>
-              <span class="circ-card-badge">06</span>
-              <div class="circ-card-inner">
-                <img src="photos/pic6.jpg" alt="יצירה 6" loading="lazy" />
-                <div class="circ-card-overlay"></div>
-                <div class="circ-card-label"><span>טעמים עונתיים</span></div>
-              </div>
-            </div>
+  <!-- ── ACCORDION GALLERY ── -->
+  <section class="gal-section" id="gallery">
+    <div class="gal-header">
+      <h2 class="section-title" style="margin-bottom:0;">הגלרייה<br/><em>שלנו</em></h2>
+    </div>
+
+    <div class="gal-carousel" id="galCarousel">
+      <div class="gal-carousel-track" id="galTrack">
+        <div class="gal-car-item" data-src="photos/photo-2026-03-30-13-43-24_1.jpg" data-label="פרלינות בוטיק">
+          <img src="photos/photo-2026-03-30-13-43-24_1.jpg" alt="פרלינות בוטיק" loading="lazy" />
+          <div class="gal-car-label">
+            <span class="gal-car-name">פרלינות בוטיק</span>
+            <span class="gal-car-num">01</span>
+          </div>
+        </div>
+        <div class="gal-car-item" data-src="photos/pic2.jpg" data-label="לוחות אמנות">
+          <img src="photos/pic2.jpg" alt="לוחות אמנות" loading="lazy" />
+          <div class="gal-car-label">
+            <span class="gal-car-name">לוחות אמנות</span>
+            <span class="gal-car-num">02</span>
+          </div>
+        </div>
+        <div class="gal-car-item" data-src="photos/pic3.jpg" data-label="מארזי מתנה">
+          <img src="photos/pic3.jpg" alt="מארזי מתנה" loading="lazy" />
+          <div class="gal-car-label">
+            <span class="gal-car-name">מארזי מתנה</span>
+            <span class="gal-car-num">03</span>
+          </div>
+        </div>
+        <div class="gal-car-item" data-src="photos/pic4.jpg" data-label="שוקולד חי">
+          <img src="photos/pic4.jpg" alt="שוקולד חי" loading="lazy" />
+          <div class="gal-car-label">
+            <span class="gal-car-name">שוקולד חי</span>
+            <span class="gal-car-num">04</span>
+          </div>
+        </div>
+        <div class="gal-car-item" data-src="photos/pic5.jpg" data-label="סדנאות יצירה">
+          <img src="photos/pic5.jpg" alt="סדנאות יצירה" loading="lazy" />
+          <div class="gal-car-label">
+            <span class="gal-car-name">סדנאות יצירה</span>
+            <span class="gal-car-num">05</span>
+          </div>
+        </div>
+        <div class="gal-car-item" data-src="photos/pic6.jpg" data-label="טעמים עונתיים">
+          <img src="photos/pic6.jpg" alt="טעמים עונתיים" loading="lazy" />
+          <div class="gal-car-label">
+            <span class="gal-car-name">טעמים עונתיים</span>
+            <span class="gal-car-num">06</span>
           </div>
         </div>
       </div>
-      <div class="circ-gallery-hint">
-        <p>גלול לסיבוב</p>
-      </div>
+      <button class="gal-car-btn gal-car-prev" id="galCarPrev" aria-label="הקודם">&#8592;</button>
+      <button class="gal-car-btn gal-car-next" id="galCarNext" aria-label="הבא">&#8594;</button>
+      <div class="gal-car-dots" id="galCarDots"></div>
     </div>
   </section>
 
@@ -2779,34 +3095,236 @@
     </svg>
   </div>
 
-  <!-- ── REVIEWS (3D Marquee) ── -->
-  <section id="reviews" class="reviews-3d-section">
-    <div class="reviews-3d-inner">
-      <div style="text-align:center;margin-bottom:3rem;">
-        <span class="section-label" style="color:var(--gold);justify-content:center">— לקוחות מרוצים</span>
-        <h2 class="section-title">חוויות<br/><em>שלא נשכחות</em></h2>
+  <!-- ── TESTIMONIALS COLUMNS ── -->
+  <section id="testimonials-columns" class="tc-section">
+    <div class="tc-inner">
+
+      <div class="tc-header">
+        <span class="section-label" style="color:var(--gold);justify-content:center;display:flex;" data-lux-reveal="fade">— ביקורות</span>
+        <h2 class="section-title" style="text-align:center;" data-lux-reveal="up" style="--reveal-delay:.12s">מה אתם אומרים <em>עלינו?</em></h2>
       </div>
-      <div class="marquee-3d-stage" aria-hidden="true">
-        <div class="marquee-3d-transform">
 
-          <!-- Col 1 -->
-          <div class="marquee-col">
-            <div class="marquee-col-inner" id="mcol1"></div>
-          </div>
-          <!-- Col 2 -->
-          <div class="marquee-col">
-            <div class="marquee-col-inner" id="mcol2"></div>
-          </div>
-          <!-- Col 3 -->
-          <div class="marquee-col">
-            <div class="marquee-col-inner" id="mcol3"></div>
-          </div>
-          <!-- Col 4 -->
-          <div class="marquee-col">
-            <div class="marquee-col-inner" id="mcol4"></div>
-          </div>
+      <div class="tc-columns-wrap">
 
+        <!-- Column 1 -->
+        <div class="tc-col tc-col--1">
+          <div class="tc-track" id="tcTrack1">
+            <div class="tc-card">
+              <div class="tc-stars">★★★★★</div>
+              <div class="tc-card-quote">השוקולד הכי טעים שטעמתי בחיי. כל נגיסה היא חוויה שלמה — כמו ביקור בפטיסרי פריזאי.</div>
+              <div class="tc-card-author">
+                <img class="tc-card-avatar" src="https://randomuser.me/api/portraits/women/11.jpg" alt="ליאת כהן" />
+                <div>
+                  <span class="tc-card-name">ליאת כהן</span>
+                  <span class="tc-card-role">לקוחה קבועה · תל אביב</span>
+                </div>
+              </div>
+            </div>
+            <div class="tc-card">
+              <div class="tc-stars">★★★★★</div>
+              <div class="tc-card-quote">קיבלתי מארז מתנה לחג והתאהבתי. האריזה כל כך יפה שלא רציתי לפתוח אותה, אבל כשפתחתי — גן עדן.</div>
+              <div class="tc-card-author">
+                <img class="tc-card-avatar" src="https://randomuser.me/api/portraits/women/22.jpg" alt="מיכל לוי" />
+                <div>
+                  <span class="tc-card-name">מיכל לוי</span>
+                  <span class="tc-card-role">מעצבת גרפית · רמת גן</span>
+                </div>
+              </div>
+            </div>
+            <div class="tc-card">
+              <div class="tc-stars">★★★★★</div>
+              <div class="tc-card-quote">הזמנתי לחתונה שלי וכולם שאלו מאיפה. השוקולד המסוים הזה הפך לנושא שיחה של כל הערב.</div>
+              <div class="tc-card-author">
+                <img class="tc-card-avatar" src="https://randomuser.me/api/portraits/women/33.jpg" alt="נועה שרון" />
+                <div>
+                  <span class="tc-card-name">נועה שרון</span>
+                  <span class="tc-card-role">כלה · חיפה</span>
+                </div>
+              </div>
+            </div>
+            <!-- Duplicate for infinite loop -->
+            <div class="tc-card" aria-hidden="true">
+              <div class="tc-stars">★★★★★</div>
+              <div class="tc-card-quote">השוקולד הכי טעים שטעמתי בחיי. כל נגיסה היא חוויה שלמה — כמו ביקור בפטיסרי פריזאי.</div>
+              <div class="tc-card-author">
+                <img class="tc-card-avatar" src="https://randomuser.me/api/portraits/women/11.jpg" alt="" />
+                <div>
+                  <span class="tc-card-name">ליאת כהן</span>
+                  <span class="tc-card-role">לקוחה קבועה · תל אביב</span>
+                </div>
+              </div>
+            </div>
+            <div class="tc-card" aria-hidden="true">
+              <div class="tc-stars">★★★★★</div>
+              <div class="tc-card-quote">קיבלתי מארז מתנה לחג והתאהבתי. האריזה כל כך יפה שלא רציתי לפתוח אותה, אבל כשפתחתי — גן עדן.</div>
+              <div class="tc-card-author">
+                <img class="tc-card-avatar" src="https://randomuser.me/api/portraits/women/22.jpg" alt="" />
+                <div>
+                  <span class="tc-card-name">מיכל לוי</span>
+                  <span class="tc-card-role">מעצבת גרפית · רמת גן</span>
+                </div>
+              </div>
+            </div>
+            <div class="tc-card" aria-hidden="true">
+              <div class="tc-stars">★★★★★</div>
+              <div class="tc-card-quote">הזמנתי לחתונה שלי וכולם שאלו מאיפה. השוקולד המסוים הזה הפך לנושא שיחה של כל הערב.</div>
+              <div class="tc-card-author">
+                <img class="tc-card-avatar" src="https://randomuser.me/api/portraits/women/33.jpg" alt="" />
+                <div>
+                  <span class="tc-card-name">נועה שרון</span>
+                  <span class="tc-card-role">כלה · חיפה</span>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
+
+        <!-- Column 2 -->
+        <div class="tc-col tc-col--2">
+          <div class="tc-track" id="tcTrack2">
+            <div class="tc-card">
+              <div class="tc-stars">★★★★★</div>
+              <div class="tc-card-quote">סדנת השוקולד הייתה החוויה הכי מיוחדת שחוויתי עם בת הזוג שלי. חזרנו כבר שלוש פעמים!</div>
+              <div class="tc-card-author">
+                <img class="tc-card-avatar" src="https://randomuser.me/api/portraits/men/44.jpg" alt="יונתן ברק" />
+                <div>
+                  <span class="tc-card-name">יונתן ברק</span>
+                  <span class="tc-card-role">יזם · ירושלים</span>
+                </div>
+              </div>
+            </div>
+            <div class="tc-card">
+              <div class="tc-stars">★★★★★</div>
+              <div class="tc-card-quote">טרופל הפיסטוק שלהן הוא שינוי חיים. אני מזמינה כל חודש ולא מפסיקה להמליץ לכולם.</div>
+              <div class="tc-card-author">
+                <img class="tc-card-avatar" src="https://randomuser.me/api/portraits/women/55.jpg" alt="דנה אזולאי" />
+                <div>
+                  <span class="tc-card-name">דנה אזולאי</span>
+                  <span class="tc-card-role">שף · תל אביב</span>
+                </div>
+              </div>
+            </div>
+            <div class="tc-card">
+              <div class="tc-stars">★★★★★</div>
+              <div class="tc-card-quote">הזמנתי 50 מארזים לעובדים שלי ושוב קיבלתי תגובות מדהימות. איכות שאין לה תחרות בארץ.</div>
+              <div class="tc-card-author">
+                <img class="tc-card-avatar" src="https://randomuser.me/api/portraits/men/66.jpg" alt="אמיר גבאי" />
+                <div>
+                  <span class="tc-card-name">אמיר גבאי</span>
+                  <span class="tc-card-role">מנכ"ל · הרצליה</span>
+                </div>
+              </div>
+            </div>
+            <!-- Duplicate for infinite loop -->
+            <div class="tc-card" aria-hidden="true">
+              <div class="tc-stars">★★★★★</div>
+              <div class="tc-card-quote">סדנת השוקולד הייתה החוויה הכי מיוחדת שחוויתי עם בת הזוג שלי. חזרנו כבר שלוש פעמים!</div>
+              <div class="tc-card-author">
+                <img class="tc-card-avatar" src="https://randomuser.me/api/portraits/men/44.jpg" alt="" />
+                <div>
+                  <span class="tc-card-name">יונתן ברק</span>
+                  <span class="tc-card-role">יזם · ירושלים</span>
+                </div>
+              </div>
+            </div>
+            <div class="tc-card" aria-hidden="true">
+              <div class="tc-stars">★★★★★</div>
+              <div class="tc-card-quote">טרופל הפיסטוק שלהן הוא שינוי חיים. אני מזמינה כל חודש ולא מפסיקה להמליץ לכולם.</div>
+              <div class="tc-card-author">
+                <img class="tc-card-avatar" src="https://randomuser.me/api/portraits/women/55.jpg" alt="" />
+                <div>
+                  <span class="tc-card-name">דנה אזולאי</span>
+                  <span class="tc-card-role">שף · תל אביב</span>
+                </div>
+              </div>
+            </div>
+            <div class="tc-card" aria-hidden="true">
+              <div class="tc-stars">★★★★★</div>
+              <div class="tc-card-quote">הזמנתי 50 מארזים לעובדים שלי ושוב קיבלתי תגובות מדהימות. איכות שאין לה תחרות בארץ.</div>
+              <div class="tc-card-author">
+                <img class="tc-card-avatar" src="https://randomuser.me/api/portraits/men/66.jpg" alt="" />
+                <div>
+                  <span class="tc-card-name">אמיר גבאי</span>
+                  <span class="tc-card-role">מנכ"ל · הרצליה</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Column 3 -->
+        <div class="tc-col tc-col--3">
+          <div class="tc-track" id="tcTrack3">
+            <div class="tc-card">
+              <div class="tc-stars">★★★★★</div>
+              <div class="tc-card-quote">כמי שסובל מאי סבילות לגלוטן, מצאתי סוף סוף שוקולד יוקרתי שגם אני יכול ליהנות ממנו.</div>
+              <div class="tc-card-author">
+                <img class="tc-card-avatar" src="https://randomuser.me/api/portraits/men/77.jpg" alt="עידו פרץ" />
+                <div>
+                  <span class="tc-card-name">עידו פרץ</span>
+                  <span class="tc-card-role">מורה · באר שבע</span>
+                </div>
+              </div>
+            </div>
+            <div class="tc-card">
+              <div class="tc-stars">★★★★★</div>
+              <div class="tc-card-quote">ביום הולדת ה-40 שלי קיבלתי מארז מותאם אישית עם שמי. פשוט קסם. ריגשתי ממש.</div>
+              <div class="tc-card-author">
+                <img class="tc-card-avatar" src="https://randomuser.me/api/portraits/women/88.jpg" alt="אורית בן דוד" />
+                <div>
+                  <span class="tc-card-name">אורית בן דוד</span>
+                  <span class="tc-card-role">פסיכולוגית · רחובות</span>
+                </div>
+              </div>
+            </div>
+            <div class="tc-card">
+              <div class="tc-stars">★★★★★</div>
+              <div class="tc-card-quote">שלחתי לאמא שלי בחו"ל ואמרה שזה מזכיר לה את הפטיסרי הכי טוב שטעמה בפריז. הכי גדול.</div>
+              <div class="tc-card-author">
+                <img class="tc-card-avatar" src="https://randomuser.me/api/portraits/women/99.jpg" alt="שירה כץ" />
+                <div>
+                  <span class="tc-card-name">שירה כץ</span>
+                  <span class="tc-card-role">עורכת דין · תל אביב</span>
+                </div>
+              </div>
+            </div>
+            <!-- Duplicate for infinite loop -->
+            <div class="tc-card" aria-hidden="true">
+              <div class="tc-stars">★★★★★</div>
+              <div class="tc-card-quote">כמי שסובל מאי סבילות לגלוטן, מצאתי סוף סוף שוקולד יוקרתי שגם אני יכול ליהנות ממנו.</div>
+              <div class="tc-card-author">
+                <img class="tc-card-avatar" src="https://randomuser.me/api/portraits/men/77.jpg" alt="" />
+                <div>
+                  <span class="tc-card-name">עידו פרץ</span>
+                  <span class="tc-card-role">מורה · באר שבע</span>
+                </div>
+              </div>
+            </div>
+            <div class="tc-card" aria-hidden="true">
+              <div class="tc-stars">★★★★★</div>
+              <div class="tc-card-quote">ביום הולדת ה-40 שלי קיבלתי מארז מותאם אישית עם שמי. פשוט קסם. ריגשתי ממש.</div>
+              <div class="tc-card-author">
+                <img class="tc-card-avatar" src="https://randomuser.me/api/portraits/women/88.jpg" alt="" />
+                <div>
+                  <span class="tc-card-name">אורית בן דוד</span>
+                  <span class="tc-card-role">פסיכולוגית · רחובות</span>
+                </div>
+              </div>
+            </div>
+            <div class="tc-card" aria-hidden="true">
+              <div class="tc-stars">★★★★★</div>
+              <div class="tc-card-quote">שלחתי לאמא שלי בחו"ל ואמרה שזה מזכיר לה את הפטיסרי הכי טוב שטעמה בפריז. הכי גדול.</div>
+              <div class="tc-card-author">
+                <img class="tc-card-avatar" src="https://randomuser.me/api/portraits/women/99.jpg" alt="" />
+                <div>
+                  <span class="tc-card-name">שירה כץ</span>
+                  <span class="tc-card-role">עורכת דין · תל אביב</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
       </div>
     </div>
   </section>
@@ -2823,32 +3341,32 @@
   <section id="faq">
     <div class="faq-inner">
       <div class="faq-side">
-        <span class="section-label" style="color:var(--gold)">— שאלות נפוצות</span>
-        <h2 class="faq-side-title">יש לכם<br/><em>שאלות?</em></h2>
-        <p class="faq-side-text">כאן תמצאו תשובות למה שהלקוחות שלנו שואלים הכי הרבה. לא מצאתם? <a href="#contact">כתבו לנו</a>.</p>
+        <span class="section-label" style="color:var(--gold)" data-lux-reveal="fade">— שאלות נפוצות</span>
+        <h2 class="faq-side-title" data-lux-reveal="up" style="--reveal-delay:.1s">יש לכם<br/><em>שאלות?</em></h2>
+        <p class="faq-side-text" data-lux-reveal="up" style="--reveal-delay:.22s">כאן תמצאו תשובות למה שהלקוחות שלנו שואלים הכי הרבה. לא מצאתם? <a href="#contact">כתבו לנו</a>.</p>
       </div>
       <div class="faq-list">
-        <div class="faq-item">
+        <div class="faq-item" data-lux-reveal="up" style="--reveal-delay:.05s">
           <button class="faq-q"><span>מה זמן האספקה להזמנה?</span><span class="faq-icon">+</span></button>
           <div class="faq-a"><div class="faq-a-inner">הזמנות רגילות מגיעות תוך 3–5 ימי עסקים. הזמנות עם אריזת מתנה מיוחדת עשויות לקחת עד 7 ימים. אנחנו שולחים ברחבי הארץ עם שליחים ייעודיים לשמירת הקירור.</div></div>
         </div>
-        <div class="faq-item">
+        <div class="faq-item" data-lux-reveal="up" style="--reveal-delay:.12s">
           <button class="faq-q"><span>האם ניתן להזמין מארז מותאם אישית?</span><span class="faq-icon">+</span></button>
           <div class="faq-a"><div class="faq-a-inner">בהחלט! אנחנו מתמחים במארזי מתנה מותאמים אישית לאירועים, חתונות וימי הולדת. ניתן לבחור טעמים, אריזה וכרטיס ברכה. פנו אלינו לפרטים.</div></div>
         </div>
-        <div class="faq-item">
+        <div class="faq-item" data-lux-reveal="up" style="--reveal-delay:.19s">
           <button class="faq-q"><span>האם יש אפשרויות ללא גלוטן וסוכר?</span><span class="faq-icon">+</span></button>
           <div class="faq-a"><div class="faq-a-inner">כן! יש לנו קולקציה שלמה ללא גלוטן וללא סוכר מוסף, ממותקת בתמרים וסירופ מייפל. כל המוצרים מסומנים בבירור. צרו קשר לגבי אינטולרנציות ספציפיות.</div></div>
         </div>
-        <div class="faq-item">
+        <div class="faq-item" data-lux-reveal="up" style="--reveal-delay:.26s">
           <button class="faq-q"><span>איך לאחסן את השוקולד?</span><span class="faq-icon">+</span></button>
           <div class="faq-a"><div class="faq-a-inner">מומלץ לאחסן במקום קריר ויבש (16–18°C), הרחק מאור שמש ישיר. בקיץ חם, עטפו בניילון לפני הקירור. תוקף: 3–6 שבועות בהתאם למוצר.</div></div>
         </div>
-        <div class="faq-item">
+        <div class="faq-item" data-lux-reveal="up" style="--reveal-delay:.33s">
           <button class="faq-q"><span>האם אפשר להגיע לסדנת שוקולד?</span><span class="faq-icon">+</span></button>
           <div class="faq-a"><div class="faq-a-inner">אנחנו מארחים סדנאות שוקולד לזוגות, קבוצות ובת מצוות בתיאום מראש. חוויה ייחודית ובלתי נשכחת. פנו אלינו לתיאום.</div></div>
         </div>
-        <div class="faq-item">
+        <div class="faq-item" data-lux-reveal="up" style="--reveal-delay:.40s">
           <button class="faq-q"><span>מה אמצעי התשלום המקובלים?</span><span class="faq-icon">+</span></button>
           <div class="faq-a"><div class="faq-a-inner">אנחנו מקבלים ביט, PayBox, העברה בנקאית ופייפאל. תשלום בכרטיס אשראי דרך לינק מאובטח — עד 12 תשלומים ללא ריבית.</div></div>
         </div>
@@ -2860,10 +3378,10 @@
   <section id="newsletter">
     <div class="nl-deco-ring"></div>
     <div class="nl-inner">
-      <span class="section-label" style="color:var(--gold); justify-content:center">— הישארו מחוברים</span>
-      <h2 class="nl-title">היכנסו לעולם<br/><em>של אדונית</em></h2>
-      <p class="nl-sub">הרשמו לניוזלטר וקבלו השראה, מתכונים, מבצעים בלעדיים וכמובן — שוקולד.</p>
-      <form class="nl-form" id="nlForm">
+      <span class="section-label" style="color:var(--gold); justify-content:center" data-lux-reveal="fade">— הישארו מחוברים</span>
+      <h2 class="nl-title" data-lux-reveal="up" style="--reveal-delay:.12s">היכנסו לעולם<br/><em>של אדונית</em></h2>
+      <p class="nl-sub" data-lux-reveal="up" style="--reveal-delay:.24s">הרשמו לניוזלטר וקבלו השראה, מתכונים, מבצעים בלעדיים וכמובן — שוקולד.</p>
+      <form class="nl-form" id="nlForm" data-lux-reveal="up" style="--reveal-delay:.36s">
         <input class="nl-input" type="email" placeholder="האימייל שלכם" required />
         <button class="nl-btn" type="submit" id="nlBtn">הצטרפו</button>
       </form>
@@ -2874,11 +3392,11 @@
   <section id="contact">
     <div class="cta-bg-text" aria-hidden="true">ADONIT</div>
     <div class="cta-inner">
-      <div class="cta-rule"></div>
-      <span class="section-label" style="color:var(--gold-light)">— צור קשר</span>
-      <h2 class="cta-title">מוכן לחוות את<br/><em>השוקולד</em>?</h2>
-      <p class="cta-sub">לקבלת הצעת מחיר, הזמנת מארזים אישיים,<br/>או פשוט שאלה — אנחנו כאן.</p>
-      <div class="cta-buttons">
+      <div class="cta-rule" data-lux-reveal="scale"></div>
+      <span class="section-label" style="color:var(--gold-light); --reveal-delay:.1s" data-lux-reveal="fade">— צור קשר</span>
+      <h2 class="cta-title" data-lux-reveal="up" style="--reveal-delay:.18s">מוכן לחוות את<br/><em>השוקולד</em>?</h2>
+      <p class="cta-sub" data-lux-reveal="up" style="--reveal-delay:.3s">לקבלת הצעת מחיר, הזמנת מארזים אישיים,<br/>או פשוט שאלה — אנחנו כאן.</p>
+      <div class="cta-buttons" data-lux-reveal="up" style="--reveal-delay:.42s">
         <a href="https://wa.me/972500000000" target="_blank" rel="noopener" class="btn-whatsapp">
           <svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16" aria-hidden="true"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
           הזמן עכשיו בוואטסאפ
@@ -2921,20 +3439,29 @@
 
   <!-- ── FOOTER ── -->
   <footer>
+    <div class="footer-ornament" aria-hidden="true">
+      <div class="footer-orn-line"></div>
+      <span class="footer-orn-gem">◆</span>
+      <span class="footer-orn-gem" style="opacity:.25;font-size:.32rem;margin:0 -.4rem">◆</span>
+      <span class="footer-orn-gem">◆</span>
+      <div class="footer-orn-line"></div>
+    </div>
     <div class="footer-inner">
       <img src="photos/new-logo.jpg" alt="אדונית השוקולד" class="footer-logo-img" />
       <div class="footer-center">
         <p class="footer-brand">אדונית השוקולד</p>
-        <p class="footer-tagline">שוקולד שמספר סיפור</p>
+        <p class="footer-tagline">Chocolaterie de Luxe · עבודת יד</p>
       </div>
       <div class="footer-links">
-        <a href="#story">הסיפור</a>
-        <a href="#gallery">גלריה</a>
-        <a href="#contact">הזמנה</a>
+        <a href="#story">— הסיפור</a>
+        <a href="#gallery">— גלריה</a>
+        <a href="#faq">— שאלות</a>
+        <a href="#contact">— הזמנה</a>
       </div>
     </div>
+    <div class="footer-divider"></div>
     <div class="footer-copy">
-      <p>© 2024 אדונית השוקולד · כל הזכויות שמורות</p>
+      <p>© 2025 אדונית השוקולד &nbsp;·&nbsp; כל הזכויות שמורות &nbsp;·&nbsp; Handcrafted with love</p>
     </div>
   </footer>
 
@@ -2942,6 +3469,28 @@
   /* =====================================================
      EXISTING SCRIPT — Cursor, Loader, Parallax, FAQ
      ===================================================== */
+
+  /* ── LENIS SMOOTH SCROLL ── */
+  const lenis = new Lenis({
+    duration: 1.4,
+    easing: t => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+    orientation: 'vertical',
+    smoothWheel: true,
+    wheelMultiplier: 0.88,
+    touchMultiplier: 1.8,
+  });
+  function lenisRaf(time) { lenis.raf(time); requestAnimationFrame(lenisRaf); }
+  requestAnimationFrame(lenisRaf);
+
+  // Override anchor smooth scroll to use Lenis
+  document.querySelectorAll('a[href^="#"]').forEach(a => {
+    a.addEventListener('click', e => {
+      const target = document.querySelector(a.getAttribute('href'));
+      if (!target) return;
+      e.preventDefault();
+      lenis.scrollTo(target, { offset: -80, duration: 1.6, easing: t => Math.min(1, 1.001 - Math.pow(2, -10 * t)) });
+    });
+  });
 
   /* ── CUSTOM CURSOR ── */
   const cursor     = document.getElementById('cursor');
@@ -2976,10 +3525,12 @@
       bar.style.width = (p * 100) + '%';
       if (p < 1) requestAnimationFrame(tick);
       else {
-        loader.style.transition = 'opacity .6s ease, visibility .6s';
+        loader.style.transition = 'opacity .7s ease, visibility .7s';
         loader.style.opacity = '0';
         loader.style.visibility = 'hidden';
-        document.body.style.overflow = '';
+        document.body.classList.add('ready');
+        // Resume Lenis after loader
+        setTimeout(() => { if (typeof lenis !== 'undefined') lenis.start(); }, 100);
       }
     }
     requestAnimationFrame(tick);
@@ -3178,42 +3729,97 @@
     }
   })();
 
-  /* ── 3D MARQUEE REVIEWS ── */
+  /* ── SPLIT TESTIMONIAL ── */
   (function() {
-    const reviews = [
-      { stars: '★★★★★', text: 'השוקולד הכי טעים שטעמתי בחיי. כל נגיסה היא חוויה שלמה.', name: 'ליאת כהן', role: 'לקוחה קבועה · תל אביב', img: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=60&q=80' },
-      { stars: '★★★★★', text: 'הזמנתי מארז מתנה לאמא שלי — היא פשוט התמוגגה. אריזה יפהפייה.', name: 'נועה לוי', role: 'לקוחה · ירושלים', img: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=60&q=80' },
-      { stars: '★★★★★', text: 'רמה אירופאית לכל דבר. פולי הקקאו, הגמר, הטעם — הכל מושלם.', name: 'דניאל מזרחי', role: 'שוקולטייר מקצועי · חיפה', img: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=60&q=80' },
-      { stars: '★★★★★', text: 'חוויה שלא נשכחת. הפרלינות מדהימות, האריזה כמו תכשיט.', name: 'מיכל אברהם', role: 'לקוחה · רמת גן', img: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=60&q=80' },
-      { stars: '★★★★★', text: 'ניסיתי המון שוקולדים בארץ ובחו״ל, אדונית השוקולד ברמה אחרת לגמרי.', name: 'יואב שפירא', role: 'לקוח · תל אביב', img: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=60&q=80' },
-      { stars: '★★★★★', text: 'קניתי מארז לחתונה — האורחים היו בהלם מהיופי והטעם.', name: 'שרה כץ', role: 'כלה · נתניה', img: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=60&q=80' },
-      { stars: '★★★★★', text: 'מוצר יוצא דופן. נמס בפה כמו ממתק שמימי. חוזרת שוב ושוב.', name: 'רינת דוד', role: 'לקוחה · פתח תקווה', img: 'https://images.unsplash.com/photo-1554151228-14d9def656e4?w=60&q=80' },
-      { stars: '★★★★★', text: 'שלמות בכל פרטי פרטים. מהאריזה ועד לטעם האחרון.', name: 'אמיר גולן', role: 'לקוח · כפר סבא', img: 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=60&q=80' },
+    const testimonials = [
+      { text: 'השוקולד הכי טעים שטעמתי בחיי. כל נגיסה היא חוויה שלמה — כמו ביקור בפטיסרי פריזאי.', name: 'ליאת כהן', role: 'לקוחה קבועה · תל אביב', img: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=400&q=80' },
+      { text: 'הזמנתי מארז מתנה לאמא שלי — היא פשוט התמוגגה. האריזה כמו תכשיט, הטעם כמו חלום.', name: 'נועה לוי', role: 'לקוחה · ירושלים', img: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=400&q=80' },
+      { text: 'רמה אירופאית לכל דבר. פולי הקקאו, הגמר, הטעם — הכל מושלם. ניסיתי בלגיה ושוויץ, וזה ברמה שלהם.', name: 'דניאל מזרחי', role: 'שוקולטייר מקצועי · חיפה', img: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&q=80' },
+      { text: 'קניתי מארז לחתונה — האורחים היו בהלם מהיופי והטעם. כולם שאלו מאיפה הזמנתי.', name: 'שרה כץ', role: 'כלה · נתניה', img: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=400&q=80' },
+      { text: 'שלמות בכל פרטי פרטים. מהאריזה ועד לטעם האחרון. חוויה שלא נשכחת בכל פעם מחדש.', name: 'אמיר גולן', role: 'לקוח · כפר סבא', img: 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=400&q=80' },
     ];
 
-    function makeCard(r) {
-      return `<div class="review-mini-card">
-        <div class="rmc-stars">${r.stars}</div>
-        <p class="rmc-text">${r.text}</p>
-        <div class="rmc-author">
-          <img src="${r.img}" class="rmc-avatar" alt="${r.name}" loading="lazy" />
-          <div>
-            <span class="rmc-name">${r.name}</span>
-            <span class="rmc-role">${r.role}</span>
-          </div>
-        </div>
-      </div>`;
+    const wrap      = document.getElementById('splitTestimonial');
+    const quoteEl   = document.getElementById('splitQuote');
+    const nameEl    = document.getElementById('splitName');
+    const roleEl    = document.getElementById('splitRole');
+    const tagEl     = document.getElementById('splitTag');
+    const authorEl  = document.getElementById('splitAuthor');
+    const imgEl     = document.getElementById('splitImg');
+    const imgWrap   = document.getElementById('splitImgWrap');
+    const dotsWrap  = document.getElementById('splitDots');
+    if (!wrap) return;
+
+    let current = 0;
+    let isAnimating = false;
+
+    // Build dots
+    testimonials.forEach((_, i) => {
+      const dot = document.createElement('button');
+      dot.className = 'split-testi-dot' + (i === 0 ? ' active' : '');
+      dot.setAttribute('aria-label', 'ביקורת ' + (i + 1));
+      dot.addEventListener('click', e => { e.stopPropagation(); goTo(i); });
+      dotsWrap.appendChild(dot);
+    });
+
+    function setVisible(els, visible) {
+      els.forEach(el => {
+        if (visible) el.classList.add('visible');
+        else el.classList.remove('visible');
+      });
     }
 
-    [1, 2, 3, 4].forEach((n, colIdx) => {
-      const col = document.getElementById('mcol' + n);
-      if (!col) return;
-      // Shuffle per column
-      const shuffled = [...reviews].sort(() => Math.random() - .5);
-      // Double for infinite loop
-      const doubled = [...shuffled, ...shuffled];
-      col.innerHTML = doubled.map(makeCard).join('');
+    function goTo(idx) {
+      if (isAnimating || idx === current) return;
+      isAnimating = true;
+      const t = testimonials[idx];
+
+      // Fade out current content
+      setVisible([quoteEl, tagEl, authorEl], false);
+
+      // Crossfade image
+      imgWrap.style.transition = 'opacity .5s ease, filter .5s ease';
+      imgWrap.style.opacity    = '0';
+      imgWrap.style.filter     = 'blur(12px)';
+
+      setTimeout(() => {
+        // Swap content
+        quoteEl.textContent = t.text;
+        nameEl.textContent  = t.name;
+        roleEl.textContent  = t.role;
+        tagEl.textContent   = t.role;
+        imgEl.src           = t.img;
+        imgEl.alt           = t.name;
+
+        // Update dots
+        dotsWrap.querySelectorAll('.split-testi-dot').forEach((d, i) => {
+          d.classList.toggle('active', i === idx);
+        });
+        current = idx;
+
+        // Fade in image
+        imgWrap.style.opacity = '1';
+        imgWrap.style.filter  = 'blur(0px)';
+
+        // Reveal text
+        setTimeout(() => {
+          setVisible([quoteEl, tagEl, authorEl], true);
+          isAnimating = false;
+        }, 80);
+      }, 500);
+    }
+
+    // Initial reveal
+    setTimeout(() => setVisible([quoteEl, tagEl, authorEl], true), 400);
+
+    // Click → next
+    wrap.addEventListener('click', () => goTo((current + 1) % testimonials.length));
+    wrap.addEventListener('keydown', e => {
+      if (e.key === 'Enter' || e.key === ' ') goTo((current + 1) % testimonials.length);
     });
+
+    // Auto-rotate
+    setInterval(() => goTo((current + 1) % testimonials.length), 6500);
   })();
 
   /* ── NAV SCROLL ── */
@@ -3223,15 +3829,7 @@
       nav.classList.toggle('scrolled', window.scrollY > 60);
     }, { passive: true });
 
-    // Smooth anchor
-    document.querySelectorAll('a[href^="#"]').forEach(a => {
-      a.addEventListener('click', e => {
-        const target = document.querySelector(a.getAttribute('href'));
-        if (!target) return;
-        e.preventDefault();
-        target.scrollIntoView({ behavior: 'smooth' });
-      });
-    });
+    // (smooth anchor now handled by Lenis init at top)
   })();
 
   /* ── STEPS ACCORDION ── */
@@ -3305,25 +3903,29 @@
     }, { passive: true });
   })();
 
-  /* ── SCROLL REVEAL (generic) ── */
+  /* ── LUXURY REVEAL SYSTEM (data-lux-reveal) ── */
   (function() {
-    const revealEls = document.querySelectorAll('.story-inner, .products-inner, .craft-step, .photo-item, .exp-inner, .review-mini-card, .faq-item, .nl-inner, .cta-inner');
+    const revealEls = document.querySelectorAll('[data-lux-reveal]');
+    if (!revealEls.length) return;
+
+    function getDelay(el) {
+      // Read from inline style attribute directly
+      const styleAttr = el.getAttribute('style') || '';
+      const match = styleAttr.match(/--reveal-delay\s*:\s*([\d.]+)s/);
+      return match ? parseFloat(match[1]) * 1000 : 0;
+    }
+
     const obs = new IntersectionObserver(entries => {
       entries.forEach(e => {
-        if (e.isIntersecting) {
-          e.target.style.opacity = '1';
-          e.target.style.transform = 'translateY(0)';
-          obs.unobserve(e.target);
-        }
+        if (!e.isIntersecting) return;
+        const el = e.target;
+        const delay = getDelay(el);
+        setTimeout(() => { el.classList.add('lux-visible'); }, delay);
+        obs.unobserve(el);
       });
-    }, { threshold: 0.08 });
+    }, { threshold: 0.07, rootMargin: '0px 0px -30px 0px' });
 
-    revealEls.forEach(el => {
-      el.style.opacity    = '0';
-      el.style.transform  = 'translateY(30px)';
-      el.style.transition = 'opacity .9s var(--ease-out), transform .9s var(--ease-out)';
-      obs.observe(el);
-    });
+    revealEls.forEach(el => obs.observe(el));
   })();
 
   /* ── FORM ── */
@@ -3352,120 +3954,143 @@
     });
   })();
 
-  /* ── 3D CIRCULAR GALLERY ── */
+  /* ── 3D CAROUSEL GALLERY ── */
   (function() {
-    const section = document.getElementById('gallery');
-    const rotor   = document.getElementById('circRotor');
-    if (!section || !rotor) return;
+    const items    = Array.from(document.querySelectorAll('.gal-car-item'));
+    const prevBtn  = document.getElementById('galCarPrev');
+    const nextBtn  = document.getElementById('galCarNext');
+    const dotsWrap = document.getElementById('galCarDots');
+    if (!items.length) return;
 
-    const cards = Array.from(rotor.querySelectorAll('.circ-card'));
-    const N = cards.length;
-    if (N === 0) return;
+    const total = items.length;
+    let current = Math.floor(total / 2);
+    let autoTimer;
 
-    // Compute radius so cards don't overlap — based on card width and N
-    const CARD_W = window.innerWidth <= 768 ? 170 : 240;
-    const isMobile = window.innerWidth <= 768;
-    // Minimum circumference needed: N * (CARD_W + gap)
-    const GAP = 60;
-    const RADIUS = Math.max(
-      Math.round((N * (CARD_W + GAP)) / (2 * Math.PI)),
-      isMobile ? 220 : 320
-    );
-    const angleStep = 360 / N;
-
-    // Place each card at its angle in 3D space
-    cards.forEach((card, i) => {
-      const angle = i * angleStep;
-      card.dataset.angle = angle;
-      card.style.transform = `rotateY(${angle}deg) translateZ(${RADIUS}px)`;
+    // Build dots
+    const dots = items.map((_, i) => {
+      const d = document.createElement('button');
+      d.className = 'gal-car-dot';
+      d.setAttribute('aria-label', 'עבור לתמונה ' + (i + 1));
+      d.addEventListener('click', () => goTo(i));
+      dotsWrap.appendChild(d);
+      return d;
     });
 
-    let rot = 0;          // current rotation
-    let vel = 0;          // velocity for inertia
-    let isDragging = false;
-    let dragStartX = 0;
-    let dragStartRot = 0;
-    let lastDragX = 0;
-    let lastDragTime = 0;
-    let autoSpin = true;  // auto-rotate when idle
-    let idleTimer = null;
-
-    // Render a frame
     function render() {
-      rotor.style.transform = `rotateY(${rot}deg)`;
-      cards.forEach(card => {
-        const cardAngle = parseFloat(card.dataset.angle);
-        // Effective angle of this card relative to front (0°)
-        const eff = ((cardAngle + rot) % 360 + 360) % 360;
-        const dist = eff > 180 ? 360 - eff : eff;
-        // Opacity: front card full, back cards clearly visible
-        card.style.opacity = Math.max(0.45, 1 - dist / 200);
-        card.classList.toggle('front', dist < angleStep * 0.5);
+      items.forEach((item, i) => {
+        let offset = i - current;
+        // Wrap-around shortest path
+        if (offset > Math.floor(total / 2))  offset -= total;
+        if (offset < -Math.floor(total / 2)) offset += total;
+
+        const isCenter   = offset === 0;
+        const isAdjacent = Math.abs(offset) === 1;
+        const visible    = Math.abs(offset) <= 1;
+
+        item.classList.toggle('is-center', isCenter);
+        item.style.visibility = visible ? 'visible' : 'hidden';
+        item.style.opacity    = isCenter ? '1' : isAdjacent ? '0.38' : '0';
+        item.style.filter     = isCenter ? 'blur(0px)' : 'blur(5px)';
+        item.style.zIndex     = isCenter ? '10' : isAdjacent ? '5' : '1';
+        item.style.transform  = [
+          `translateX(${offset * 48}%)`,
+          `scale(${isCenter ? 1 : isAdjacent ? 0.82 : 0.65})`,
+          `rotateY(${offset * -10}deg)`
+        ].join(' ');
       });
+
+      dots.forEach((d, i) => d.classList.toggle('active', i === current));
     }
 
-    // Main loop
-    function loop() {
-      if (!isDragging) {
-        if (autoSpin) {
-          rot += 0.09; // auto-rotation speed
-        } else {
-          // Inertia after drag
-          rot += vel;
-          vel *= 0.93; // friction
-          if (Math.abs(vel) < 0.01) vel = 0;
-        }
-      }
+    function goTo(idx) {
+      current = (idx + total) % total;
       render();
-      requestAnimationFrame(loop);
     }
 
-    function startIdle() {
-      clearTimeout(idleTimer);
-      idleTimer = setTimeout(() => { autoSpin = true; }, 2500);
+    function advance() { goTo(current + 1); }
+    function retreat() { goTo(current - 1); }
+
+    function startAuto() {
+      clearInterval(autoTimer);
+      autoTimer = setInterval(advance, 4000);
     }
 
-    // ── DRAG / TOUCH ──
-    function onDragStart(clientX) {
-      isDragging = true;
-      autoSpin = false;
-      vel = 0;
-      dragStartX = clientX;
-      dragStartRot = rot;
-      lastDragX = clientX;
-      lastDragTime = performance.now();
-      clearTimeout(idleTimer);
-    }
-    function onDragMove(clientX) {
-      if (!isDragging) return;
-      const dx = clientX - dragStartX;
-      rot = dragStartRot - dx * 0.4;
-      // Track velocity
-      const now = performance.now();
-      const dt = now - lastDragTime;
-      if (dt > 0) vel = -(clientX - lastDragX) / dt * 16 * 0.4;
-      lastDragX = clientX;
-      lastDragTime = now;
-    }
-    function onDragEnd() {
-      isDragging = false;
-      startIdle();
+    prevBtn.addEventListener('click', () => { retreat(); startAuto(); });
+    nextBtn.addEventListener('click', () => { advance(); startAuto(); });
+
+    // Swipe support
+    let touchStartX = 0;
+    const track = document.getElementById('galTrack');
+    track.addEventListener('touchstart', e => { touchStartX = e.touches[0].clientX; }, { passive: true });
+    track.addEventListener('touchend', e => {
+      const dx = e.changedTouches[0].clientX - touchStartX;
+      if (Math.abs(dx) > 40) { dx < 0 ? advance() : retreat(); startAuto(); }
+    });
+
+    // Click center image → open lightbox
+    const lightbox   = document.getElementById('galLightbox');
+    const lbImg      = lightbox && lightbox.querySelector('.gal-lb-img');
+    const lbCaption  = lightbox && lightbox.querySelector('.gal-lb-caption');
+    const lbClose    = lightbox && lightbox.querySelector('.gal-lb-close');
+    const lbBackdrop = lightbox && lightbox.querySelector('.gal-lb-backdrop');
+    const lbPrev     = lightbox && lightbox.querySelector('.gal-lb-prev');
+    const lbNext     = lightbox && lightbox.querySelector('.gal-lb-next');
+
+    function openLightbox(idx) {
+      if (!lightbox) return;
+      const item = items[idx];
+      const img  = item.querySelector('img');
+      const name = item.querySelector('.gal-car-name');
+      lbImg.src  = item.dataset.src || img.src;
+      lbImg.alt  = img.alt;
+      lbCaption.textContent = name ? name.textContent : '';
+      lightbox.classList.add('open');
+      document.body.style.overflow = 'hidden';
     }
 
-    // Mouse
-    rotor.addEventListener('mousedown',  e => onDragStart(e.clientX));
-    window.addEventListener('mousemove', e => onDragMove(e.clientX));
-    window.addEventListener('mouseup',   () => onDragEnd());
+    items.forEach((item, i) => {
+      item.addEventListener('click', () => {
+        if (i === current) { openLightbox(i); }
+        else { goTo(i); startAuto(); }
+      });
+    });
 
-    // Touch
-    rotor.addEventListener('touchstart', e => onDragStart(e.touches[0].clientX), { passive: true });
-    window.addEventListener('touchmove', e => { if (isDragging) onDragMove(e.touches[0].clientX); }, { passive: true });
-    window.addEventListener('touchend',  () => onDragEnd());
+    function closeLightbox() {
+      if (!lightbox) return;
+      lightbox.classList.remove('open');
+      document.body.style.overflow = '';
+      setTimeout(() => { lbImg.src = ''; }, 450);
+    }
 
-    // No scroll-driven rotation — auto-spin only
+    function navLightbox(dir) {
+      const idx  = (current + dir + total) % total;
+      goTo(idx);
+      const item = items[idx];
+      const img  = item.querySelector('img');
+      const name = item.querySelector('.gal-car-name');
+      lbImg.style.opacity = '0';
+      lbImg.style.transition = 'opacity .25s ease';
+      setTimeout(() => {
+        lbImg.src = item.dataset.src || img.src;
+        lbImg.alt = img.alt;
+        lbCaption.textContent = name ? name.textContent : '';
+        lbImg.style.opacity = '1';
+      }, 250);
+    }
+
+    if (lbClose)    lbClose.addEventListener('click', closeLightbox);
+    if (lbBackdrop) lbBackdrop.addEventListener('click', closeLightbox);
+    if (lbPrev)     lbPrev.addEventListener('click', e => { e.stopPropagation(); navLightbox(-1); });
+    if (lbNext)     lbNext.addEventListener('click', e => { e.stopPropagation(); navLightbox(1); });
+    document.addEventListener('keydown', e => {
+      if (!lightbox || !lightbox.classList.contains('open')) return;
+      if (e.key === 'Escape')     closeLightbox();
+      if (e.key === 'ArrowLeft')  navLightbox(1);
+      if (e.key === 'ArrowRight') navLightbox(-1);
+    });
 
     render();
-    loop();
+    startAuto();
   })();
 
   /* ── NAV ACTIVE ITEM on scroll ── */
@@ -4535,7 +5160,7 @@
 
     revealTargets.forEach(function(img, i) {
       // Only add clip-path if image isn't already animated by other means
-      if (!img.closest('.circ-card')) { // skip 3d carousel — it has its own animations
+      if (!img.closest('.gal-item')) { // skip masonry gallery — it has its own curtain reveal
         img.classList.add('clip-reveal-ready');
         img.dataset.revealDelay = (i % 4) * 80; // slight stagger per row
         imageObserver.observe(img);
@@ -4611,7 +5236,7 @@
   <!-- ── 3D TILT + DEPTH EFFECTS ── -->
   <script>
   (function() {
-    /* 3D Tilt on cards — applies to circ-cards, sel-options, photo-items */
+    /* 3D Tilt on cards — applies to sel-options, photo-items */
     function addTilt(selector, maxTilt, scale) {
       document.querySelectorAll(selector).forEach(function(el) {
         el.addEventListener('mousemove', function(e) {
@@ -4765,17 +5390,6 @@
       line-height: 1.6 !important;
     }
 
-    /* Enhanced 3D card glow on hover */
-    .circ-card {
-      transition: box-shadow 0.4s ease, transform 0.1s ease !important;
-    }
-    .circ-card:hover {
-      box-shadow: 0 20px 60px rgba(0,0,0,0.7),
-                  0 0 0 1px rgba(160,120,64,0.35),
-                  0 0 50px rgba(160,120,64,0.25),
-                  inset 0 1px 0 rgba(201,169,110,0.2) !important;
-    }
-
     /* Photo item 3D depth shadow on hover */
     .photo-item {
       transition: transform 0.6s cubic-bezier(0.22,1,0.36,1), box-shadow 0.5s ease;
@@ -4834,5 +5448,16 @@
   })();
   </script>
 
+  <!-- Gallery Lightbox -->
+  <div class="gal-lightbox" id="galLightbox" role="dialog" aria-modal="true" aria-label="תצוגת תמונה">
+    <div class="gal-lb-backdrop"></div>
+    <button class="gal-lb-prev" aria-label="הקודם">&#8592;</button>
+    <button class="gal-lb-next" aria-label="הבא">&#8594;</button>
+    <div class="gal-lb-content">
+      <button class="gal-lb-close" aria-label="סגור">✕</button>
+      <img class="gal-lb-img" src="" alt="" />
+      <div class="gal-lb-caption"></div>
+    </div>
+  </div>
 </body>
 </html>
